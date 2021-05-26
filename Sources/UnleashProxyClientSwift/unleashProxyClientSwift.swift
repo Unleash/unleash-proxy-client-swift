@@ -34,10 +34,10 @@ struct Context {
 
 @available(macOS 10.15, *)
 public class UnleashClient: ObservableObject {
-    let unleashUrl: String
+    public let unleashUrl: String
     let apiKey: String
     let refreshInterval: Int?
-    var context: [String: String] = [:]
+    public var context: [String: String] = [:]
     var timer: Timer?
     var toggles: [String: Toggle] = [:]
     var ready: Bool
@@ -103,7 +103,15 @@ public class UnleashClient: ObservableObject {
     }
     
     public func updateContext(context: [String: String]) -> Void {
-        self.context = context;
+        var newContext: [String: String] = [:]
+        newContext["appName"] = self.context["appName"]
+        newContext["environment"] = self.context["environment"]
+        
+        context.forEach { (key, value ) in
+            newContext[key] = value
+        }
+        
+        self.context = newContext
         self.stop()
         self.start()
     }
