@@ -39,7 +39,7 @@ public class UnleashClient: ObservableObject {
     let refreshInterval: Int?
     var context: [String: String] = [:]
     var timer: Timer?
-    var toggles: [Toggle]
+    var toggles: [String: Toggle] = [:]
     var ready: Bool
     
     public init(unleashUrl: String, clientKey: String, refreshInterval: Int? = nil, appName: String? = nil, environment: String? = nil) {
@@ -49,7 +49,7 @@ public class UnleashClient: ObservableObject {
         self.context["appName"] = appName
         self.context["environment"] = environment
         self.timer = nil
-        self.toggles = []
+        self.toggles = [:]
         self.ready = false
    }
     
@@ -69,20 +69,21 @@ public class UnleashClient: ObservableObject {
     }
     
     public func isEnabled(name: String) -> Bool {
-        for toggle in self.toggles {
-            if toggle.name == name {
-                return toggle.enabled;
-            }
+        let toggle = self.toggles[name]
+        if toggle != nil {
+            return toggle!.enabled
         }
+        
         return false
     }
     
     public func getVariant(name: String) -> Variant? {
-        for toggle in self.toggles {
-            if toggle.name == name {
-                return toggle.variant
-            }
+        let toggle = self.toggles[name]
+
+        if toggle != nil {
+            return toggle?.variant
         }
+        
         return nil
     }
     
@@ -106,6 +107,16 @@ public class UnleashClient: ObservableObject {
         self.context = context;
         self.stop()
         self.start()
+    }
+    
+    private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
+        var toggleMap: [String: Toggle] = [:]
+        
+        for toggle in features.toggles {
+            toggleMap[toggle.name] = toggle
+        }
+        
+        return toggleMap
     }
     
     private func getFeatures() -> Void {
@@ -150,7 +161,7 @@ public class UnleashClient: ObservableObject {
                         return
                     }
                     
-                    self.toggles = json.toggles
+                    self.toggles = self.createFeatureMap(features: json)
                     if (self.ready) {
                         SwiftEventBus.post("update")
                     } else {
