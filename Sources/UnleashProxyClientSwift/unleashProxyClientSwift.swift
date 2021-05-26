@@ -126,7 +126,6 @@ public class UnleashClient: ObservableObject {
         }
         
         var request = URLRequest(url: url)
-        print(request.url as Any)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.apiKey, forHTTPHeaderField: "Authorization")
@@ -168,15 +167,8 @@ public class UnleashClient: ObservableObject {
                         SwiftEventBus.post("ready")
                         self.ready = true
                     }
-                    
-                    for feature in json.toggles {
-                        print(feature.name)
-                    }
                 }
-
-
             }
-           
         }).resume()
     }
 }
