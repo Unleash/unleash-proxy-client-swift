@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SwiftEventBus",
+        "repositoryURL": "https://github.com/cesarferreira/SwiftEventBus.git",
+        "state": {
+          "branch": null,
+          "revision": "a30ff35e616f507d8a8d122dac32a2150371a87e",
+          "version": "5.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
