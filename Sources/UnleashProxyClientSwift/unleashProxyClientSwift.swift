@@ -58,7 +58,6 @@ public class UnleashClient: ObservableObject {
         
  
         self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
-            print("FIRING")
             self.getFeatures()
         }
         RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
