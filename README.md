@@ -90,13 +90,13 @@ func handleReady() {
     // do this when unleash is ready
 }
 
-unleash.subscribe(name: "ready", callback: callback)
+unleash.subscribe(name: "ready", callback: handleReady)
 
-func handleUpdated() {
+func handleUpdate() {
     // do this when unleash is updated
 }
 
-unleash.subscribe(name: "update", callback: callback)
+unleash.subscribe(name: "update", callback: handleUpdate)
 ```
 
 The ready event is fired once the client has received it's first set of feature toggles and cached it in memory. Every subsequent event will be an update event that is triggered if there is a change in the feature toggle configuration.
