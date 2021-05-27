@@ -27,7 +27,7 @@ let package = Package(
             name: "UnleashProxyClientSwift",
             dependencies: ["SwiftEventBus"]),
         .testTarget(
-                   name: "unleash-proxy-client-swiftTests",
+                   name: "UnleashProxyClientSwiftTests",
                    dependencies: ["UnleashProxyClientSwift"]),
     ]
 )

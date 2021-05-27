@@ -2,63 +2,30 @@
 import Foundation
 import SwiftEventBus
 
-// MARK: - Welcome
-struct FeatureResponse: Codable {
-    let toggles: [Toggle]
-}
 
-// MARK: - Toggle
-struct Toggle: Codable {
-    let name: String
-    let enabled: Bool
-    let variant: Variant
-}
-
-// MARK: - Variant
-public struct Variant: Codable {
-    let name: String
-    let enabled: Bool
-    let payload: Payload?
-}
-
-// MARK: - Payload
-public struct Payload: Codable {
-    let type, value: String
-}
-
-struct Context {
-    let appName: String?
-    let environment: String?
-}
-
-
-@available(macOS 10.15, *)
-public class UnleashClient: ObservableObject {
-    public let unleashUrl: String
-    let apiKey: String
-    let refreshInterval: Int?
-    public var context: [String: String] = [:]
+public class Poller {
+    var refreshInterval: Int?
+    var unleashUrl: String
     var timer: Timer?
     var toggles: [String: Toggle] = [:]
     var ready: Bool
+    var apiKey: String;
     
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int? = nil, appName: String? = nil, environment: String? = nil) {
-        self.unleashUrl = unleashUrl
-        self.apiKey = clientKey
+    public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String) {
         self.refreshInterval = refreshInterval
-        self.context["appName"] = appName
-        self.context["environment"] = environment
+        self.unleashUrl = unleashUrl
+        self.apiKey = apiKey
         self.timer = nil
         self.toggles = [:]
         self.ready = false
    }
     
-    public func start() -> Void {
-        self.getFeatures()
+    public func start(context: [String: String]) -> Void {
+        self.getFeatures(context: context)
         
  
         self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
-            self.getFeatures()
+            self.getFeatures(context: context)
         }
         RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
     }
@@ -67,53 +34,14 @@ public class UnleashClient: ObservableObject {
         self.timer?.invalidate();
     }
     
-    public func isEnabled(name: String) -> Bool {
-        let toggle = self.toggles[name]
-        if toggle != nil {
-            return toggle!.enabled
-        }
-        
-        return false
-    }
-    
-    public func getVariant(name: String) -> Variant? {
-        let toggle = self.toggles[name]
-
-        if toggle != nil {
-            return toggle?.variant
-        }
-        
-        return nil
-    }
-    
-    public func subscribe(name: String, callback: @escaping () -> Void) {
-        SwiftEventBus.onBackgroundThread(self, name: name) { result in
-            callback()
-        }
-    }
-    
-    private func formatURL() -> String {
+    func formatURL(context: [String: String]) -> String {
         var params: [String] = []
-        for key in self.context.keys {
-        let param = "\(key)=\(unwrap(self.context[key]))"
+        for key in context.keys {
+        let param = "\(key)=\(unwrap(context[key]))"
            params.append(param)
         }
 
         return self.unleashUrl + "?" + params.joined(separator: "&");
-    }
-    
-    public func updateContext(context: [String: String]) -> Void {
-        var newContext: [String: String] = [:]
-        newContext["appName"] = self.context["appName"]
-        newContext["environment"] = self.context["environment"]
-        
-        context.forEach { (key, value ) in
-            newContext[key] = value
-        }
-        
-        self.context = newContext
-        self.stop()
-        self.start()
     }
     
     private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
@@ -126,8 +54,8 @@ public class UnleashClient: ObservableObject {
         return toggleMap
     }
     
-    private func getFeatures() -> Void {
-        guard let url = URL(string: formatURL()) else {
+    func getFeatures(context: [String: String]) -> Void {
+        guard let url = URL(string: formatURL(context: context)) else {
             print("Invalid URL")
             return
         }
