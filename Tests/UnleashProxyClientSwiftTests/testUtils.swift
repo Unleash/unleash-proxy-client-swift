@@ -9,8 +9,8 @@ import Foundation
 @testable import UnleashProxyClientSwift
 
 func generateBasicTestToggleMap() -> [String: Toggle] {
-    let toggleOne = Toggle(name: "Test", enabled: true, variant: nil)
-    let toggleTwo = Toggle(name: "TestTwo", enabled: false, variant: nil)
+    let toggleOne = Toggle(name: "Test", enabled: true, variant: Variant(name: "disabled", enabled: false, payload: nil))
+    let toggleTwo = Toggle(name: "TestTwo", enabled: false, variant: Variant(name: "disabled", enabled: false, payload: nil))
     var toggleMap: [String: Toggle] = [:]
     toggleMap[toggleOne.name] = toggleOne
     toggleMap[toggleTwo.name] = toggleTwo

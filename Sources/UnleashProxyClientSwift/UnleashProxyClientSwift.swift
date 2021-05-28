@@ -11,7 +11,7 @@ struct FeatureResponse: Codable {
 public struct Toggle: Codable {
     let name: String
     let enabled: Bool
-    let variant: Variant?
+    let variant: Variant
 }
 
 // MARK: - Variant
@@ -67,16 +67,14 @@ public class UnleashClient: ObservableObject {
         return false
     }
     
-    public func getVariant(name: String) -> Variant? {
+    public func getVariant(name: String) -> Variant {
         let toggle = self.poller.toggles[name]
 
         if toggle != nil {
-            if toggle?.variant != nil {
-              return toggle!.variant!
-            }
+            return toggle!.variant
         }
         
-        return nil
+        return Variant(name: "disabled", enabled: false, payload: nil)
     }
     
     public func subscribe(name: String, callback: @escaping () -> Void) {

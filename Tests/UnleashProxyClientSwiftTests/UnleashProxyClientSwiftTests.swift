@@ -25,9 +25,9 @@
             let variantB = unleash.getVariant(name: "TestTwo")
             let variantC = unleash.getVariant(name: "DoesNotExist")
            
-            XCTAssert(variantA!.name == "TestA" && variantA!.enabled == true)
-            XCTAssert(variantB!.name == "TestB" && variantB!.enabled == false)
-            XCTAssert(variantC == nil)
+            XCTAssert(variantA.name == "TestA" && variantA.enabled == true)
+            XCTAssert(variantB.name == "TestB" && variantB.enabled == false)
+            XCTAssert(variantC.name == "disabled") // change this to empty variant - name: disabled - enabled: false - empty payload
         }
         
         func testTimer() {

@@ -25,9 +25,6 @@ In order to get started you need to import and instantiate the unleash client:
 import SwiftUI
 // Import UnleashProxyClientSwift
 import UnleashProxyClientSwift
-
-
-
     
 // Setup Unleash in the context where it makes most sense
 
