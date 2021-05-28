@@ -10,6 +10,7 @@ public class Poller {
     var toggles: [String: Toggle] = [:]
     var ready: Bool
     var apiKey: String;
+    var etag: String;
     
     public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String) {
         self.refreshInterval = refreshInterval
@@ -18,6 +19,7 @@ public class Poller {
         self.timer = nil
         self.toggles = [:]
         self.ready = false
+        self.etag = ""
    }
     
     public func start(context: [String: String]) -> Void {
@@ -65,6 +67,10 @@ public class Poller {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.apiKey, forHTTPHeaderField: "Authorization")
         
+        if (self.etag != "") {
+            request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
+        }
+        
         
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             guard let data = data, error == nil else {
@@ -85,6 +91,12 @@ public class Poller {
                 
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
+                    
+                    if let etag = httpResponse.allHeaderFields["If-None-Match"] as? String {
+                        self.etag = etag
+                    }
+                    
+                    
                     do {
                         result = try JSONDecoder().decode(FeatureResponse.self, from: data)
                     } catch {
