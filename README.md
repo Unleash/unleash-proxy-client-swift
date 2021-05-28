@@ -57,8 +57,7 @@ if unleash.isEnabled(name: "ios") {
 You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants) and use them in a similar fashion: 
 ```
 var variant = unleash.getVariant(name: "ios")
-if variant != nil && variant!.enabled {
-
+if variant.enabled {
     // do something
 } else {
    // do something else
