@@ -66,10 +66,8 @@ public class Poller {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.apiKey, forHTTPHeaderField: "Authorization")
-        
-        if (self.etag != "") {
-            request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
-        }
+        request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         
         
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
@@ -78,8 +76,7 @@ public class Poller {
                 return
             }
             
-            if let httpResponse = response as? HTTPURLResponse{
-                
+            if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode == 304 {
                     print("No changes in feature toggles.")
                     return
@@ -93,10 +90,9 @@ public class Poller {
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
                     
-                    if let etag = httpResponse.allHeaderFields["Etag"] as? String {
-                        self.etag = etag
+                    if httpResponse.allHeaderFields["Etag"] as! String != "" {
+                        self.etag = httpResponse.allHeaderFields["Etag"] as! String
                     }
-                    
                     
                     do {
                         result = try JSONDecoder().decode(FeatureResponse.self, from: data)
