@@ -92,7 +92,7 @@ public class Poller {
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
                     
-                    if let etag = httpResponse.allHeaderFields["If-None-Match"] as? String {
+                    if let etag = httpResponse.allHeaderFields["ETag"] as? String {
                         self.etag = etag
                     }
                     
