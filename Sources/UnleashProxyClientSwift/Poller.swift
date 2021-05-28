@@ -24,7 +24,7 @@ public class Poller {
     
     public func start(context: [String: String]) -> Void {
         self.getFeatures(context: context)
-        
+        print("Starting")
  
         self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
             self.getFeatures(context: context)
