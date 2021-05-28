@@ -87,12 +87,13 @@ public class Poller {
                 
                 if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
                     print("Error fetching toggles")
+                    return
                 }
                 
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
                     
-                    if let etag = httpResponse.allHeaderFields["ETag"] as? String {
+                    if let etag = httpResponse.allHeaderFields["Etag"] as? String {
                         self.etag = etag
                     }
                     
