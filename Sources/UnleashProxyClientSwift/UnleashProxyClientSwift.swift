@@ -9,21 +9,21 @@ struct FeatureResponse: Codable {
 
 // MARK: - Toggle
 public struct Toggle: Codable {
-    let name: String
-    let enabled: Bool
-    let variant: Variant
+    public let name: String
+    public let enabled: Bool
+    public let variant: Variant
 }
 
 // MARK: - Variant
 public struct Variant: Codable {
-    let name: String
-    let enabled: Bool
-    let payload: Payload?
+    public let name: String
+    public let enabled: Bool
+    public let payload: Payload?
 }
 
 // MARK: - Payload
 public struct Payload: Codable {
-    let type, value: String
+    public let type, value: String
 }
 
 struct Context {
