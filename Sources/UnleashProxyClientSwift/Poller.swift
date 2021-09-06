@@ -90,8 +90,8 @@ public class Poller {
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
                     
-                    if httpResponse.allHeaderFields["Etag"] as! String != "" {
-                        self.etag = httpResponse.allHeaderFields["Etag"] as! String
+                    if let etag = httpResponse.value(forHTTPHeaderField: "Etag"), !etag.isEmpty {
+                        self.etag = etag
                     }
                     
                     do {
