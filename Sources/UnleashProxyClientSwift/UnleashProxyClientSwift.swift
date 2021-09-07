@@ -77,7 +77,7 @@ public class UnleashClient: ObservableObject {
         newContext["appName"] = self.context["appName"]
         newContext["environment"] = self.context["environment"]
         
-        context.forEach { (key, value ) in
+        context.forEach { (key, value) in
             newContext[key] = value
         }
         
