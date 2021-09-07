@@ -39,7 +39,7 @@ public class Poller {
     }
     
     public func stop() -> Void {
-        self.timer?.invalidate();
+        self.timer?.invalidate()
     }
     
     func formatURL(context: [String: String]) -> String {
@@ -49,7 +49,7 @@ public class Poller {
            params.append(param)
         }
 
-        return self.unleashUrl + "?" + params.joined(separator: "&");
+        return unleashUrl + "?" + params.joined(separator: "&")
     }
     
     private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
