@@ -31,8 +31,8 @@ func generateTestToggleMapWithVariant() -> [String: Toggle] {
     return toggleMap
 }
 
-func setup(dataGenerator: @escaping () -> [String: Toggle]) -> UnleashClient {
-    let poller = MockPoller(callback: dataGenerator, unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", apiKey: "SECRET")
+func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClient {
+    let poller = MockPoller(callback: dataGenerator, unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", apiKey: "SECRET", session: session)
     
     let unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller)
     

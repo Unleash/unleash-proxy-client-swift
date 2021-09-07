@@ -2,6 +2,9 @@
 import Foundation
 import SwiftEventBus
 
+public protocol PollerSession {
+    func perform(_ request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void)
+}
 
 public class Poller {
     var refreshInterval: Int?
@@ -12,7 +15,9 @@ public class Poller {
     var apiKey: String;
     var etag: String;
     
-    public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String) {
+    private let session: PollerSession
+    
+    public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String, session: PollerSession = URLSession.shared) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
@@ -20,6 +25,7 @@ public class Poller {
         self.toggles = [:]
         self.ready = false
         self.etag = ""
+        self.session = session
    }
     
     public func start(context: [String: String]) -> Void {
@@ -69,8 +75,7 @@ public class Poller {
         request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
         request.cachePolicy = .reloadIgnoringLocalCacheData
         
-        
-        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+        session.perform(request, completionHandler: { (data, response, error) in
             guard let data = data, error == nil else {
                 print("Something went wrong")
                 return
@@ -90,8 +95,8 @@ public class Poller {
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
                     
-                    if httpResponse.allHeaderFields["Etag"] as! String != "" {
-                        self.etag = httpResponse.allHeaderFields["Etag"] as! String
+                    if let etag = httpResponse.value(forHTTPHeaderField: "Etag"), !etag.isEmpty {
+                        self.etag = etag
                     }
                     
                     do {
@@ -113,7 +118,7 @@ public class Poller {
                     }
                 }
             }
-        }).resume()
+        })
     }
 }
 
