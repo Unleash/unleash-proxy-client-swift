@@ -32,10 +32,11 @@ public class Poller {
         self.getFeatures(context: context)
         
  
-        self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
+        let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
             self.getFeatures(context: context)
         }
-        RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
+        self.timer = timer
+        RunLoop.current.add(timer, forMode: .default)
     }
     
     public func stop() -> Void {
