@@ -59,22 +59,11 @@ public class UnleashClient: ObservableObject {
     }
     
     public func isEnabled(name: String) -> Bool {
-        let toggle = self.poller.toggles[name]
-        if toggle != nil {
-            return toggle!.enabled
-        }
-        
-        return false
+        return poller.toggles[name]?.enabled ?? false
     }
     
     public func getVariant(name: String) -> Variant {
-        let toggle = self.poller.toggles[name]
-
-        if toggle != nil {
-            return toggle!.variant
-        }
-        
-        return Variant(name: "disabled", enabled: false, payload: nil)
+        return poller.toggles[name]?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
     }
     
     public func subscribe(name: String, callback: @escaping () -> Void) {
