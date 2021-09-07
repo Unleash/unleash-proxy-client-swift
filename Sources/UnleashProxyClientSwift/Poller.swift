@@ -49,13 +49,11 @@ public class Poller {
     }
     
     private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
-        var toggleMap: [String: Toggle] = [:]
-        
-        for toggle in features.toggles {
-            toggleMap[toggle.name] = toggle
+        return features.toggles.reduce([String: Toggle]()) { result, toggle in
+            var updatedResult = result
+            updatedResult[toggle.name] = toggle
+            return updatedResult
         }
-        
-        return toggleMap
     }
     
     func getFeatures(context: [String: String]) -> Void {
