@@ -43,11 +43,7 @@ public class Poller {
     }
     
     func formatURL(context: [String: String]) -> String {
-        var params: [String] = []
-        for key in context.keys {
-        let param = "\(key)=\(unwrap(context[key]))"
-           params.append(param)
-        }
+        let params = context.keys.map({ "\($0)=\(unwrap(context[$0]))" })
 
         return unleashUrl + "?" + params.joined(separator: "&")
     }
