@@ -42,8 +42,8 @@ public class UnleashClient: ObservableObject {
         self.context["appName"] = appName
         self.context["environment"] = environment
         self.timer = nil
-        if (poller != nil) {
-            self.poller = poller!
+        if let poller = poller {
+            self.poller = poller
         } else {
             self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: unleashUrl, apiKey: clientKey)
         }
