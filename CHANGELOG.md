@@ -1,4 +1,8 @@
 
+# 0.0.3
+- test: add Poller network tests for response header access
+- refactor: use case-insensitive Etag header accessor
+- `Toggle`, `Variant`, and `Payload` properties are public
 # 0.0.2
 - feat: add gh action
 - fix: set cache policy
