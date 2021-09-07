@@ -51,7 +51,7 @@ public class UnleashClient: ObservableObject {
    }
     
     public func start() -> Void {
-        poller.start(context: self.context)
+        poller.start(context: context)
     }
     
     public func stop() -> Void {
