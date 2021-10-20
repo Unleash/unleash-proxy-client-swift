@@ -32,7 +32,7 @@ class MockPoller: Poller {
         super.init(refreshInterval: 15, unleashUrl: unleashUrl, apiKey: apiKey, session: session)
     }
     
-    override func getFeatures(context: [String: String]) -> Void {
+    override func getFeatures(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         self.toggles = dataGenerator()
     }
 }

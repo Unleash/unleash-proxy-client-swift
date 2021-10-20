@@ -5,6 +5,7 @@ final class PollerTests: XCTestCase {
 
     private let unleashUrl = "https://app.unleash-hosted.com/hosted/api/proxy"
     private let apiKey = "SECRET"
+    private let timeout = 1.0
 
     func testTitleCaseEtagResponseHeader() {
         let response = mockResponse(headerFields: ["Etag": "W/\"77f-WboeNIYTrCbEJ+TK78VuhInQn2M\""])
@@ -40,8 +41,88 @@ final class PollerTests: XCTestCase {
         XCTAssertEqual(poller.etag, "W/\"7c-GUwjw43L+nPpd9TY5PHtsXJueiM\"")
     }
 
-    private func createPoller(with session: PollerSession) -> Poller {
-        return Poller(refreshInterval: nil, unleashUrl: unleashUrl, apiKey: apiKey, session: session)
+    func testStartCompletesWithUrlError() {
+        let response = mockResponse()
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = createPoller(with: session, url: "invalid url")
+        let expectation = XCTestExpectation(description: "Expect .url PollerError.")
+        poller.start(context: [:]) { error in
+            XCTAssertEqual(error, .url)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
+    }
+
+    func testStartCompletesWithDataError() {
+        let response = mockResponse()
+        let session = MockPollerSession(data: nil, response: response)
+        let poller = createPoller(with: session)
+        let expectation = XCTestExpectation(description: "Expect .data PollerError.")
+        poller.start(context: [:]) { error in
+            XCTAssertEqual(error, .data)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
+    }
+
+    func testStartCompletesWithoutErrorWhenResponseNotModified() {
+        let response = mockResponse(statusCode: 304)
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = createPoller(with: session)
+        let expectation = XCTestExpectation(description: "Expect error to be nil.")
+        poller.start(context: [:]) { error in
+            XCTAssertNil(error)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
+    }
+
+    func testStartCompletesWithNetworkError() {
+        for statusCode in 400..<599 {
+            let response = mockResponse(statusCode: statusCode)
+            let data = stubData()
+            let session = MockPollerSession(data: data, response: response)
+            let poller = createPoller(with: session)
+            let expectation = XCTestExpectation(description: "Expect .network PollerError for status: \(statusCode).")
+            poller.start(context: [:]) { error in
+                XCTAssertEqual(error, .network)
+                expectation.fulfill()
+            }
+            wait(for: [expectation], timeout: timeout)
+        }
+    }
+
+    func testStartCompletesWithDecodingError() {
+        let response = mockResponse()
+        let stub: [String: Any] = ["toggles": [["foo": "bar", "baz": true]]]
+        let data = try! JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)
+        let session = MockPollerSession(data: data, response: response)
+        let poller = createPoller(with: session)
+        let expectation = XCTestExpectation(description: "Expect .decoding PollerError.")
+        poller.start(context: [:]) { error in
+            XCTAssertEqual(error, .decoding)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
+    }
+
+    func testStartCompletesWithoutError() {
+        let response = mockResponse()
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = createPoller(with: session)
+        let expectation = XCTestExpectation(description: "Expect error to be nil.")
+        poller.start(context: [:]) { error in
+            XCTAssertNil(error)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
+    }
+
+    private func createPoller(with session: PollerSession, url: String? = nil) -> Poller {
+        return Poller(refreshInterval: nil, unleashUrl: url ?? unleashUrl, apiKey: apiKey, session: session)
     }
 
     private func mockResponse(statusCode: Int = 200, headerFields: [String : String]? = nil) -> URLResponse {
@@ -51,8 +132,16 @@ final class PollerTests: XCTestCase {
     private func stubData() -> Data {
         let stub: [String: Any] = [
             "toggles": [
-                [ "name": "foo", "enabled": true ],
-                [ "name": "bar", "enabled": false ]
+                [
+                    "name": "foo",
+                    "enabled": true,
+                    "variant": ["name": "disabled", "enabled": false]
+                ],
+                [
+                    "name": "bar",
+                    "enabled": false,
+                    "variant": ["name": "disabled", "enabled": false]
+                ]
             ]
         ]
         return try! JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)

@@ -37,7 +37,7 @@ public class UnleashClient: ObservableObject {
     public var context: [String: String] = [:]
     var timer: Timer?
     var poller: Poller
-    
+
     public init(unleashUrl: String, clientKey: String, refreshInterval: Int? = nil, appName: String? = nil, environment: String? = nil, poller: Poller? = nil) {
         self.context["appName"] = appName
         self.context["environment"] = environment
@@ -47,40 +47,40 @@ public class UnleashClient: ObservableObject {
         } else {
             self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: unleashUrl, apiKey: clientKey)
         }
-     
+
    }
-    
-    public func start() -> Void {
-        poller.start(context: context)
+
+    public func start(completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+        poller.start(context: context, completionHandler: completionHandler)
     }
-    
+
     public func stop() -> Void {
         poller.stop()
     }
-    
+
     public func isEnabled(name: String) -> Bool {
         return poller.toggles[name]?.enabled ?? false
     }
-    
+
     public func getVariant(name: String) -> Variant {
         return poller.toggles[name]?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
     }
-    
+
     public func subscribe(name: String, callback: @escaping () -> Void) {
         SwiftEventBus.onBackgroundThread(self, name: name) { result in
             callback()
         }
     }
-    
+
     public func updateContext(context: [String: String]) -> Void {
         var newContext: [String: String] = [:]
         newContext["appName"] = self.context["appName"]
         newContext["environment"] = self.context["environment"]
-        
+
         context.forEach { (key, value) in
             newContext[key] = value
         }
-        
+
         self.context = newContext
         self.stop()
         self.start()
