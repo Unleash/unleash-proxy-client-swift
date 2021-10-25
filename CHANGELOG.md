@@ -1,4 +1,16 @@
 
+# 0.0.4
+- feat: add optional completion handler to poller start
+- Merge pull request #8 from ranunez/main
+- Removes an instance of an implicitly unwrapped optional
+- Uses a reduce instead of a for loop
+- Uses a map instead of a for loop
+- Removes unused semicolon
+- Removes extra newlines
+- Removes extra space
+- Uses cleaner syntax
+- Uses if let syntax
+- Uses consistent syntax
 # 0.0.3
 - test: add Poller network tests for response header access
 - refactor: use case-insensitive Etag header accessor
