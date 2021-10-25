@@ -6,6 +6,13 @@ public protocol PollerSession {
     func perform(_ request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void)
 }
 
+public enum PollerError: Error {
+    case data
+    case decoding
+    case network
+    case url
+}
+
 public class Poller {
     var refreshInterval: Int?
     var unleashUrl: String
@@ -26,12 +33,11 @@ public class Poller {
         self.ready = false
         self.etag = ""
         self.session = session
-   }
-    
-    public func start(context: [String: String]) -> Void {
-        self.getFeatures(context: context)
-        
- 
+    }
+
+    public func start(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+        self.getFeatures(context: context, completionHandler: completionHandler)
+
         let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
             self.getFeatures(context: context)
         }
@@ -57,8 +63,9 @@ public class Poller {
         }
     }
     
-    func getFeatures(context: [String: String]) -> Void {
+    func getFeatures(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         guard let url = URL(string: formatURL(context: context)) else {
+            completionHandler?(.url)
             print("Invalid URL")
             return
         }
@@ -72,17 +79,20 @@ public class Poller {
         
         session.perform(request, completionHandler: { (data, response, error) in
             guard let data = data, error == nil else {
+                completionHandler?(.data)
                 print("Something went wrong")
                 return
             }
             
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode == 304 {
+                    completionHandler?(nil)
                     print("No changes in feature toggles.")
                     return
                 }
                 
                 if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
+                    completionHandler?(.network)
                     print("Error fetching toggles")
                     return
                 }
@@ -101,6 +111,7 @@ public class Poller {
                     }
                     
                     guard let json = result else {
+                        completionHandler?(.decoding)
                         return
                     }
                     
@@ -111,6 +122,8 @@ public class Poller {
                         SwiftEventBus.post("ready")
                         self.ready = true
                     }
+
+                    completionHandler?(nil)
                 }
             }
         })
