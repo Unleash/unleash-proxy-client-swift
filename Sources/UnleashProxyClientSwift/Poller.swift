@@ -32,34 +32,29 @@ public class Poller {
         self.getFeatures(context: context)
         
  
-        self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
+        let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
             self.getFeatures(context: context)
         }
-        RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
+        self.timer = timer
+        RunLoop.current.add(timer, forMode: .default)
     }
     
     public func stop() -> Void {
-        self.timer?.invalidate();
+        self.timer?.invalidate()
     }
     
     func formatURL(context: [String: String]) -> String {
-        var params: [String] = []
-        for key in context.keys {
-        let param = "\(key)=\(unwrap(context[key]))"
-           params.append(param)
-        }
+        let params = context.keys.map({ "\($0)=\(unwrap(context[$0]))" })
 
-        return self.unleashUrl + "?" + params.joined(separator: "&");
+        return unleashUrl + "?" + params.joined(separator: "&")
     }
     
     private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
-        var toggleMap: [String: Toggle] = [:]
-        
-        for toggle in features.toggles {
-            toggleMap[toggle.name] = toggle
+        return features.toggles.reduce([String: Toggle]()) { result, toggle in
+            var updatedResult = result
+            updatedResult[toggle.name] = toggle
+            return updatedResult
         }
-        
-        return toggleMap
     }
     
     func getFeatures(context: [String: String]) -> Void {
@@ -121,8 +116,3 @@ public class Poller {
         })
     }
 }
-
-
-
-
-

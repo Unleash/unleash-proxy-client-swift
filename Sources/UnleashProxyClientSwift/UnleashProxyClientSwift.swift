@@ -42,8 +42,8 @@ public class UnleashClient: ObservableObject {
         self.context["appName"] = appName
         self.context["environment"] = environment
         self.timer = nil
-        if (poller != nil) {
-            self.poller = poller!
+        if let poller = poller {
+            self.poller = poller
         } else {
             self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: unleashUrl, apiKey: clientKey)
         }
@@ -51,7 +51,7 @@ public class UnleashClient: ObservableObject {
    }
     
     public func start() -> Void {
-        poller.start(context: self.context)
+        poller.start(context: context)
     }
     
     public func stop() -> Void {
@@ -59,22 +59,11 @@ public class UnleashClient: ObservableObject {
     }
     
     public func isEnabled(name: String) -> Bool {
-        let toggle = self.poller.toggles[name]
-        if toggle != nil {
-            return toggle!.enabled
-        }
-        
-        return false
+        return poller.toggles[name]?.enabled ?? false
     }
     
     public func getVariant(name: String) -> Variant {
-        let toggle = self.poller.toggles[name]
-
-        if toggle != nil {
-            return toggle!.variant
-        }
-        
-        return Variant(name: "disabled", enabled: false, payload: nil)
+        return poller.toggles[name]?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
     }
     
     public func subscribe(name: String, callback: @escaping () -> Void) {
@@ -88,7 +77,7 @@ public class UnleashClient: ObservableObject {
         newContext["appName"] = self.context["appName"]
         newContext["environment"] = self.context["environment"]
         
-        context.forEach { (key, value ) in
+        context.forEach { (key, value) in
             newContext[key] = value
         }
         
@@ -97,8 +86,3 @@ public class UnleashClient: ObservableObject {
         self.start()
     }
 }
-
-
-
-
-
