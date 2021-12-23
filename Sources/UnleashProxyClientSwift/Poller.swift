@@ -100,7 +100,7 @@ public class Poller {
                 if httpResponse.statusCode == 200 {
                     var result: FeatureResponse?
                     
-                    if let etag = httpResponse.value(forHTTPHeaderField: "Etag"), !etag.isEmpty {
+                    if let etag = httpResponse.allHeaderFields["Etag"] as? String, !etag.isEmpty {
                         self.etag = etag
                     }
                     
