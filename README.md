@@ -7,6 +7,8 @@ The unleash-proxy-client-swift will then cache these toggles in a map in memory 
 ## Requirements
 - MacOS: 12.15
 - iOS: 13
+- tvOS: 13
+- watchOS: 6
 
 ## Installation
 Follow the following steps in order to install the unleash-proxy-client-swift:
