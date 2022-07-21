@@ -1,6 +1,6 @@
 # unleash-proxy-client-swift
 
-The unleash-proxy-client-swift makes it easy for native applications and other swift platforms to connect to the unleash proxy. The proxy will evaluate a feature toggle for a given [context](https://docs.getunleash.io/docs/user_guide/unleash_context) and return a list of feature flags relevant for the provided context. 
+The unleash-proxy-client-swift makes it easy for native applications and other swift platforms to connect to the unleash proxy. The proxy will evaluate a feature toggle for a given [context](https://docs.getunleash.io/docs/user_guide/unleash_context) and return a list of feature flags relevant for the provided context.
 
 The unleash-proxy-client-swift will then cache these toggles in a map in memory and refresh the configuration at a configurable interval, making queries against the toggle configuration extremely fast.
 
@@ -21,20 +21,20 @@ Follow the following steps in order to install the unleash-proxy-client-swift:
 Once you're done, you should see SwiftEventBus and UnleashProxyClientSwift listed as dependencies in the file explorer of your project.
 
 ## Usage
-In order to get started you need to import and instantiate the unleash client: 
+In order to get started you need to import and instantiate the unleash client:
 
 ```
 import SwiftUI
 import UnleashProxyClientSwift
-    
+
 // Setup Unleash in the context where it makes most sense
 
 var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "PROXY_KEY", refreshInterval: 15, appName: "test", environment: "dev")
-     
+
 unleash.start()
 ```
 
-In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters: 
+In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters:
 
 - unleashUrl: the full url to your proxy instance [String]
 - clientKey: the proxy key [String]
@@ -46,7 +46,7 @@ Running `unleash.start()` will make the first request against the proxy and retr
 
 NOTE: While waiting to boot up the configuration may not be available, which means that asking for a feature toggle may result in a false if the configuration has not loaded. In the event that you need to be certain that the configuration is loaded we emit an event you can subscribe to, once the configuration is loaded. See more in the Events section.
 
-Once the configuration is loaded you can ask against the cache for a given feature toggle: 
+Once the configuration is loaded you can ask against the cache for a given feature toggle:
 ```
 if unleash.isEnabled(name: "ios") {
     // do something
@@ -55,7 +55,7 @@ if unleash.isEnabled(name: "ios") {
 }
 ```
 
-You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants) and use them in a similar fashion: 
+You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants) and use them in a similar fashion:
 ```
 var variant = unleash.getVariant(name: "ios")
 if variant.enabled {
@@ -66,7 +66,7 @@ if variant.enabled {
 ```
 
 ### Update context
-In order to update the context you can use the following method: 
+In order to update the context you can use the following method:
 ```
 var context: [String: String] = [:]
 context["userId"] = "c3b155b0-5ebe-4a20-8386-e0cab160051e"
@@ -77,12 +77,12 @@ This will stop and start the polling interval in order to renew polling with new
 
 ## Events
 
-The proxy client emits two different events you can subscribe to: 
+The proxy client emits two different events you can subscribe to:
 
 - "ready"
 - "update"
 
-Usage them in the following manner: 
+Usage them in the following manner:
 ```
 func handleReady() {
     // do this when unleash is ready
@@ -98,3 +98,29 @@ unleash.subscribe(name: "update", callback: handleUpdate)
 ```
 
 The ready event is fired once the client has received it's first set of feature toggles and cached it in memory. Every subsequent event will be an update event that is triggered if there is a change in the feature toggle configuration.
+
+## Releasing
+
+Note: To release the package you'll need to have [CocoaPods](https://cocoapods.org/) installed.
+
+First, you'll need to bump the version number of the package, you can find this in `UnleashProxyClientSwift.podspec`, we use SemVer for this project. Once that's committed and merged to main, add a git tag:
+
+```sh
+git tag -a v0.0.4 -m "v0.0.4"
+```
+
+Please make sure that that tag is pushed to remote.
+
+The next few commands assume that you have CocoaPods installed and available on your shell.
+
+Linting the podspec is always a good idea:
+
+```sh
+pod spec lint UnleashProxyClientSwift.podspec
+```
+
+Once that succeeds, you can do the actual release:
+
+```sh
+pod trunk push UnleashProxyClientSwift.podspec --allow-warnings
+```
