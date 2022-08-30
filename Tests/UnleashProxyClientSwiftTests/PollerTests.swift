@@ -2,7 +2,7 @@ import XCTest
 @testable import UnleashProxyClientSwift
 
 final class PollerTests: XCTestCase {
-    
+
     private let unleashUrl = "https://app.unleash-hosted.com/hosted/api/proxy"
     private let apiKey = "SECRET"
     private let timeout = 1.0
