@@ -7,7 +7,6 @@ public protocol PollerSession {
 }
 
 public enum PollerError: Error {
-    case response
     case data
     case decoding
     case network
@@ -79,62 +78,54 @@ public class Poller {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         
         session.perform(request, completionHandler: { (data, response, error) in
-            guard let httpResponse = response as? HTTPURLResponse, error == nil else {
-                completionHandler?(.response)
-                print("Something went wrong")
-                return
-            }
-            
-            if httpResponse.statusCode == 304 {
-                completionHandler?(nil)
-                print("No changes in feature toggles.")
-                return
-            }
-            
-            if httpResponse.statusCode == 204 {
-                completionHandler?(nil)
-                print("Cached feature toggles on clients")
-                return
-            }
-            
-            if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
-                completionHandler?(.network)
-                print("Error fetching toggles")
-                return
-            }
-            
-            guard let data = data, httpResponse.statusCode == 200 else {
+            guard let data = data, error == nil else {
                 completionHandler?(.data)
                 print("Something went wrong")
                 return
             }
             
-            var result: FeatureResponse?
-            
-            if let etag = httpResponse.allHeaderFields["Etag"] as? String, !etag.isEmpty {
-                self.etag = etag
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 304 {
+                    completionHandler?(nil)
+                    print("No changes in feature toggles.")
+                    return
+                }
+                
+                if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
+                    completionHandler?(.network)
+                    print("Error fetching toggles")
+                    return
+                }
+                
+                if httpResponse.statusCode == 200 {
+                    var result: FeatureResponse?
+                    
+                    if let etag = httpResponse.allHeaderFields["Etag"] as? String, !etag.isEmpty {
+                        self.etag = etag
+                    }
+                    
+                    do {
+                        result = try JSONDecoder().decode(FeatureResponse.self, from: data)
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                    
+                    guard let json = result else {
+                        completionHandler?(.decoding)
+                        return
+                    }
+                    
+                    self.toggles = self.createFeatureMap(features: json)
+                    if (self.ready) {
+                        SwiftEventBus.post("update")
+                    } else {
+                        SwiftEventBus.post("ready")
+                        self.ready = true
+                    }
+
+                    completionHandler?(nil)
+                }
             }
-            
-            do {
-                result = try JSONDecoder().decode(FeatureResponse.self, from: data)
-            } catch {
-                print(error.localizedDescription)
-            }
-            
-            guard let json = result else {
-                completionHandler?(.decoding)
-                return
-            }
-            
-            self.toggles = self.createFeatureMap(features: json)
-            if (self.ready) {
-                SwiftEventBus.post("update")
-            } else {
-                SwiftEventBus.post("ready")
-                self.ready = true
-            }
-            
-            completionHandler?(nil)
         })
     }
 }

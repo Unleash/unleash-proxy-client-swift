@@ -54,17 +54,6 @@ final class PollerTests: XCTestCase {
         wait(for: [expectation], timeout: timeout)
     }
 
-    func testStartCompletesWithResponseError() {
-        let session = MockPollerSession(data: nil, response: nil)
-        let poller = createPoller(with: session)
-        let expectation = XCTestExpectation(description: "Expect .response PollerError.")
-        poller.start(context: [:]) { error in
-            XCTAssertEqual(error, .response)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: timeout)
-    }
-
     func testStartCompletesWithDataError() {
         let response = mockResponse()
         let session = MockPollerSession(data: nil, response: response)
@@ -79,19 +68,6 @@ final class PollerTests: XCTestCase {
 
     func testStartCompletesWithoutErrorWhenResponseNotModified() {
         let response = mockResponse(statusCode: 304)
-        let data = stubData()
-        let session = MockPollerSession(data: data, response: response)
-        let poller = createPoller(with: session)
-        let expectation = XCTestExpectation(description: "Expect error to be nil.")
-        poller.start(context: [:]) { error in
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: timeout)
-    }
-
-    func testStartCompletesWithoutErrorWhenResponseNoContent() {
-        let response = mockResponse(statusCode: 204)
         let data = stubData()
         let session = MockPollerSession(data: data, response: response)
         let poller = createPoller(with: session)
