@@ -54,13 +54,13 @@ final class PollerTests: XCTestCase {
         wait(for: [expectation], timeout: timeout)
     }
 
-    func testStartCompletesWithDataError() {
+    func testStartCompletesWithoutErrorWhenDataEmpty() {
         let response = mockResponse()
         let session = MockPollerSession(data: nil, response: response)
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect .data PollerError.")
         poller.start(context: [:]) { error in
-            XCTAssertEqual(error, .data)
+            XCTAssertNil(error)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: timeout)

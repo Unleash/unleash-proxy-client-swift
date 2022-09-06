@@ -7,7 +7,6 @@ public protocol PollerSession {
 }
 
 public enum PollerError: Error {
-    case data
     case decoding
     case network
     case url
@@ -78,12 +77,6 @@ public class Poller {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         
         session.perform(request, completionHandler: { (data, response, error) in
-            guard let data = data, error == nil else {
-                completionHandler?(.data)
-                print("Something went wrong")
-                return
-            }
-            
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode == 304 {
                     completionHandler?(nil)
@@ -94,6 +87,12 @@ public class Poller {
                 if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
                     completionHandler?(.network)
                     print("Error fetching toggles")
+                    return
+                }
+                
+                guard let data = data else {
+                    completionHandler?(nil)
+                    print("No response data")
                     return
                 }
                 
@@ -122,7 +121,7 @@ public class Poller {
                         SwiftEventBus.post("ready")
                         self.ready = true
                     }
-
+                    
                     completionHandler?(nil)
                 }
             }
