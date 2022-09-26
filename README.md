@@ -101,15 +101,17 @@ The ready event is fired once the client has received it's first set of feature 
 
 Note: To release the package you'll need to have [CocoaPods](https://cocoapods.org/) installed.
 
-First, you'll need to bump the version number of the package, you can find this in `UnleashProxyClientSwift.podspec`, we use SemVer for this project. Once that's committed and merged to main, add a git tag:
+First, you'll need to add a tag. Releasing the tag is enough for the Swift package manager, but it's polite to also ensure CocoaPods users can also consume the code.
 
 ```sh
-git tag -a v0.0.4 -m "v0.0.4"
+git tag -a 0.0.4 -m "v0.0.4"
 ```
 
 Please make sure that that tag is pushed to remote.
 
 The next few commands assume that you have CocoaPods installed and available on your shell.
+
+Bump the version number of the package, you can find this in `UnleashProxyClientSwift.podspec`, we use SemVer for this project. Once that's committed and merged to main:
 
 Linting the podspec is always a good idea:
 
