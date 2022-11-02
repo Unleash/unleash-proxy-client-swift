@@ -50,7 +50,8 @@ public class UnleashClient: ObservableObject {
 
    }
 
-    public func start(completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+    public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+        Printer.showPrintStatements = printToConsole
         poller.start(context: context, completionHandler: completionHandler)
     }
 
