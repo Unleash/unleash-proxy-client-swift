@@ -65,7 +65,7 @@ public class Poller {
     func getFeatures(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         guard let url = URL(string: formatURL(context: context)) else {
             completionHandler?(.url)
-            print("Invalid URL")
+            Printer.printMessage("Invalid URL")
             return
         }
         
@@ -80,19 +80,19 @@ public class Poller {
             if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode == 304 {
                     completionHandler?(nil)
-                    print("No changes in feature toggles.")
+                    Printer.printMessage("No changes in feature toggles.")
                     return
                 }
                 
                 if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
                     completionHandler?(.network)
-                    print("Error fetching toggles")
+                    Printer.printMessage("Error fetching toggles")
                     return
                 }
                 
                 guard let data = data else {
                     completionHandler?(nil)
-                    print("No response data")
+                    Printer.printMessage("No response data")
                     return
                 }
                 
@@ -106,7 +106,7 @@ public class Poller {
                     do {
                         result = try JSONDecoder().decode(FeatureResponse.self, from: data)
                     } catch {
-                        print(error.localizedDescription)
+                        Printer.printMessage(error.localizedDescription)
                     }
                     
                     guard let json = result else {
