@@ -21,31 +21,31 @@ Once you're done, you should see SwiftEventBus and UnleashProxyClientSwift liste
 ## Usage
 In order to get started you need to import and instantiate the unleash client:
 
-```
+```swift
 import SwiftUI
 import UnleashProxyClientSwift
 
 // Setup Unleash in the context where it makes most sense
 
-var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "PROXY_KEY", refreshInterval: 15, appName: "test", environment: "dev")
+var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test", environment: "dev")
 
 unleash.start()
 ```
 
 In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters:
 
-- unleashUrl: the full url to your proxy instance [String]
-- clientKey: the proxy key [String]
-- refreshInterval: the polling interval in seconds [Int]
-- appName: the application name identifier [String]
-- environment: the application env [String]
+- `unleashUrl`: the full url to either the [Unleash front-end API](https://docs.getunleash.io/reference/front-end-api) OR an [Unleash proxy](https://docs.getunleash.io/reference/unleash-proxy) [String]
+- `clientKey`: either an [client-side API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) if you use the front-end API ([how](https://docs.getunleash.io/how-to/how-to-create-api-tokens "how do I create API tokens?")) or a [proxy client key](https://docs.getunleash.io/reference/api-tokens-and-client-keys#proxy-client-keys) if you use the proxy [String]
+- `refreshInterval`: the polling interval in seconds [Int]
+- `appName`: the application name identifier [String]
+- `environment`: the application env [String]
 
 Running `unleash.start()` will make the first request against the proxy and retrieve the feature toggle configuration, and set up the polling interval in the background.
 
 NOTE: While waiting to boot up the configuration may not be available, which means that asking for a feature toggle may result in a false if the configuration has not loaded. In the event that you need to be certain that the configuration is loaded we emit an event you can subscribe to, once the configuration is loaded. See more in the Events section.
 
 Once the configuration is loaded you can ask against the cache for a given feature toggle:
-```
+```swift
 if unleash.isEnabled(name: "ios") {
     // do something
 } else {
@@ -54,7 +54,7 @@ if unleash.isEnabled(name: "ios") {
 ```
 
 You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants) and use them in a similar fashion:
-```
+```swift
 var variant = unleash.getVariant(name: "ios")
 if variant.enabled {
     // do something
@@ -65,7 +65,7 @@ if variant.enabled {
 
 ### Update context
 In order to update the context you can use the following method:
-```
+```swift
 var context: [String: String] = [:]
 context["userId"] = "c3b155b0-5ebe-4a20-8386-e0cab160051e"
 unleash.updateContext(context: context)
@@ -81,7 +81,7 @@ The proxy client emits two different events you can subscribe to:
 - "update"
 
 Usage them in the following manner:
-```
+```swift
 func handleReady() {
     // do this when unleash is ready
 }
