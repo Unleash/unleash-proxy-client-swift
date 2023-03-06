@@ -27,7 +27,7 @@ import UnleashProxyClientSwift
 
 // Setup Unleash in the context where it makes most sense
 
-var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test", environment: "dev")
+var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test")
 
 unleash.start()
 ```
@@ -38,7 +38,6 @@ In the example above we import the UnleashProxyClientSwift and instantiate the c
 - `clientKey`: either an [client-side API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) if you use the front-end API ([how](https://docs.getunleash.io/how-to/how-to-create-api-tokens "how do I create API tokens?")) or a [proxy client key](https://docs.getunleash.io/reference/api-tokens-and-client-keys#proxy-client-keys) if you use the proxy [String]
 - `refreshInterval`: the polling interval in seconds [Int]
 - `appName`: the application name identifier [String]
-- `environment`: the application env [String]
 
 Running `unleash.start()` will make the first request against the proxy and retrieve the feature toggle configuration, and set up the polling interval in the background.
 
