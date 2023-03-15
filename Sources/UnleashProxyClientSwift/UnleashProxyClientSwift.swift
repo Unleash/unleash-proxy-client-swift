@@ -77,7 +77,7 @@ public class UnleashClient: ObservableObject {
         }
     }
 
-    public func updateContext(context: [String: String]) -> Void {
+    public func updateContext(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         var newContext: [String: String] = [:]
         newContext["appName"] = self.context["appName"]
         newContext["environment"] = self.context["environment"]
@@ -88,6 +88,6 @@ public class UnleashClient: ObservableObject {
 
         self.context = newContext
         self.stop()
-        self.start()
+        self.start(completionHandler: completionHandler)
     }
 }
