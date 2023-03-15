@@ -38,6 +38,10 @@ public class UnleashClient: ObservableObject {
     var timer: Timer?
     var poller: Poller
 
+    public var toggles: [String: Toggle] {
+        poller.toggles
+    }
+
     public init(unleashUrl: String, clientKey: String, refreshInterval: Int? = nil, appName: String? = nil, environment: String? = nil, poller: Poller? = nil) {
         self.context["appName"] = appName
         self.context["environment"] = environment

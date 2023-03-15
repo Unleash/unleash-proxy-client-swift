@@ -16,19 +16,19 @@ public class Poller {
     var refreshInterval: Int?
     var unleashUrl: String
     var timer: Timer?
-    var toggles: [String: Toggle] = [:]
+    var toggles: [String: Toggle]
     var ready: Bool
     var apiKey: String;
     var etag: String;
     
     private let session: PollerSession
     
-    public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String, session: PollerSession = URLSession.shared) {
+    public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String, toggles: [String: Toggle] = [:], session: PollerSession = URLSession.shared) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
         self.timer = nil
-        self.toggles = [:]
+        self.toggles = toggles
         self.ready = false
         self.etag = ""
         self.session = session
