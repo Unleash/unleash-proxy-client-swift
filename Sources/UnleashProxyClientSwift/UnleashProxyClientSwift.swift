@@ -33,7 +33,7 @@ struct Context {
 
 
 @available(macOS 10.15, *)
-public class UnleashClient: ObservableObject {
+public class UnleashClientBase {
     public var context: [String: String] = [:]
     var timer: Timer?
     var poller: Poller
@@ -86,4 +86,8 @@ public class UnleashClient: ObservableObject {
         self.stop()
         self.start()
     }
+}
+
+@available(iOS 13, *)
+public class UnleashClient: UnleashClientBase, ObservableObject {
 }

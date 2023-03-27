@@ -31,10 +31,20 @@ func generateTestToggleMapWithVariant() -> [String: Toggle] {
     return toggleMap
 }
 
+@available(iOS 13, *)
 func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClient {
     let poller = MockPoller(callback: dataGenerator, unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", apiKey: "SECRET", session: session)
     
     let unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller)
+    
+    unleash.start()
+    return unleash
+}
+
+func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClientBase {
+    let poller = MockPoller(callback: dataGenerator, unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", apiKey: "SECRET", session: session)
+    
+    let unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller)
     
     unleash.start()
     return unleash

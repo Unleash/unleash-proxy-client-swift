@@ -6,7 +6,7 @@ The unleash-proxy-client-swift will then cache these toggles in a map in memory 
 
 ## Requirements
 - MacOS: 12.15
-- iOS: 13
+- iOS: 12
 
 ## Installation
 Follow the following steps in order to install the unleash-proxy-client-swift:
@@ -21,6 +21,7 @@ Once you're done, you should see SwiftEventBus and UnleashProxyClientSwift liste
 ## Usage
 In order to get started you need to import and instantiate the unleash client:
 
+### iOS >= 13
 ```swift
 import SwiftUI
 import UnleashProxyClientSwift
@@ -31,6 +32,19 @@ var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleas
 
 unleash.start()
 ```
+
+### iOS >= 12
+```swift
+import SwiftUI
+import UnleashProxyClientSwift
+
+// Setup Unleash in the context where it makes most sense
+
+var unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test")
+
+unleash.start()
+```
+
 
 In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters:
 
