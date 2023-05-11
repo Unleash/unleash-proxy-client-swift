@@ -8,7 +8,7 @@ final class MetricsTests: XCTestCase {
         SwiftEventBus.onBackgroundThread(self, name: "sent") { _ in
             metricsSent.fulfill()
         }
-        let fixedClock = { Calendar(identifier: .gregorian).date(from: DateComponents(year: 2022, month: 12, day: 25))! }
+        let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
         var recordedRequestBody: Data?
         let poster: (URLRequest) async throws -> (Data, URLResponse) = { request in
             recordedRequestBody = request.httpBody
