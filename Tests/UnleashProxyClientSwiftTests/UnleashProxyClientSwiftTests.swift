@@ -58,7 +58,7 @@
             context["sessionId"] = "uuid-234-test"
             unleash.updateContext(context: context)
             
-            let url = unleash.poller.formatURL(context: unleash.context)
+            let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
             
             XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid-123-test") && url.contains("environment=dev"))
         }
@@ -120,7 +120,9 @@
             context["sessionId"] = "uuid-234-test"
             unleash.updateContext(context: context)
             
-            let url = unleash.poller.formatURL(context: unleash.context)
+            let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
+
+
 
             XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid%20123-test") && url.contains("environment=dev"))
         }

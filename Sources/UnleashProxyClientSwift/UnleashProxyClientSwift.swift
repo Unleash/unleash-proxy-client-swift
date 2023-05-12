@@ -50,7 +50,7 @@ public class UnleashClientBase {
         if let poller = poller {
             self.poller = poller
         } else {
-            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: unleashUrl, apiKey: clientKey)
+            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey)
         }
         if let metrics = metrics {
             self.metrics = metrics

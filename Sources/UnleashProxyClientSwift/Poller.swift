@@ -14,7 +14,7 @@ public enum PollerError: Error {
 
 public class Poller {
     var refreshInterval: Int?
-    var unleashUrl: String
+    var unleashUrl: URL
     var timer: Timer?
     var toggles: [String: Toggle] = [:]
     var ready: Bool
@@ -22,8 +22,8 @@ public class Poller {
     var etag: String;
     
     private let session: PollerSession
-    
-    public init(refreshInterval: Int? = nil, unleashUrl: String, apiKey: String, session: PollerSession = URLSession.shared) {
+
+    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
@@ -48,14 +48,13 @@ public class Poller {
         self.timer?.invalidate()
     }
 
-    func formatURL(context: [String: String]) -> String {
-        let encodedParams = context.map { key, value in
-            let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            return "\(encodedKey)=\(encodedValue)"
+    func formatURL(context: [String: String]) -> URL? {
+        var components = URLComponents(url: unleashUrl, resolvingAgainstBaseURL: false)
+        components?.queryItems = context.map { key, value in
+            URLQueryItem(name: key, value: value)
         }
 
-        return unleashUrl + "?" + encodedParams.joined(separator: "&")
+        return components?.url
     }
     
     private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
@@ -67,7 +66,7 @@ public class Poller {
     }
     
     func getFeatures(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
-        guard let url = URL(string: formatURL(context: context)) else {
+        guard let url = formatURL(context: context) else {
             completionHandler?(.url)
             Printer.printMessage("Invalid URL")
             return
