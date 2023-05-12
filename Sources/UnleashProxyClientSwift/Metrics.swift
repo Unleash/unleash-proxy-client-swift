@@ -133,6 +133,7 @@ public class Metrics {
             let (_, _) = try await poster(request)
             SwiftEventBus.post("sent")
         } catch {
+            Printer.printMessage("Error sending metrics")
             SwiftEventBus.post("error", sender: error)
         }
     }
