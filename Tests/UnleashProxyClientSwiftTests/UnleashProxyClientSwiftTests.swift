@@ -116,12 +116,12 @@
             let unleash = setupBase(dataGenerator: dataGenerator)
             
             var context: [String: String] = [:]
-            context["userId"] = "uuid-123-test"
+            context["userId"] = "uuid 123-test"
             context["sessionId"] = "uuid-234-test"
             unleash.updateContext(context: context)
             
             let url = unleash.poller.formatURL(context: unleash.context)
-            
-            XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid-123-test") && url.contains("environment=dev"))
+
+            XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid%20123-test") && url.contains("environment=dev"))
         }
     }

@@ -47,11 +47,15 @@ public class Poller {
     public func stop() -> Void {
         self.timer?.invalidate()
     }
-    
-    func formatURL(context: [String: String]) -> String {
-        let params = context.keys.map({ "\($0)=\(unwrap(context[$0]))" })
 
-        return unleashUrl + "?" + params.joined(separator: "&")
+    func formatURL(context: [String: String]) -> String {
+        let encodedParams = context.map { key, value in
+            let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            return "\(encodedKey)=\(encodedValue)"
+        }
+
+        return unleashUrl + "?" + encodedParams.joined(separator: "&")
     }
     
     private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
