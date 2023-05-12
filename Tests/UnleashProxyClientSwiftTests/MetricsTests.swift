@@ -65,4 +65,52 @@ final class MetricsTests: XCTestCase {
                 decodedExpectedMetrics as? [String: AnyHashable],
                 "The recorded request body should match the expected metrics")
     }
+
+    func testFailOnCountMetricsSent() throws {
+        let metricsSentError = expectation(description: "Metrics sent error")
+        SwiftEventBus.onBackgroundThread(self, name: "error") { _ in
+            metricsSentError.fulfill()
+        }
+
+        let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
+
+        let poster: (URLRequest) async throws -> (Data, URLResponse) = { request in
+            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Metrics posting error"])
+        }
+
+        let metrics = Metrics(appName: "TestApp",
+                metricsInterval: 1,
+                clock: fixedClock,
+                poster: poster,
+                url: URL(string: "https://unleashinstance.com")!,
+                clientKey: "testKey")
+        metrics.start()
+
+        metrics.count(name: "irrelevant", enabled: true)
+
+        wait(for: [metricsSentError], timeout: 2)
+    }
+
+    func testDisabledMetrics() throws {
+        let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
+
+        let poster: (URLRequest) async throws -> (Data, URLResponse) = { request in
+            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "should never get here"])
+        }
+
+        let metrics = Metrics(appName: "TestApp",
+                metricsInterval: 1,
+                clock: fixedClock,
+                disableMetrics: true,
+                poster: poster,
+                url: URL(string: "https://unleashinstance.com")!,
+                clientKey: "testKey")
+        metrics.start()
+
+        metrics.count(name: "irrelevant", enabled: true)
+        metrics.countVariant(name: "testToggle", variant: "variantA")
+
+        XCTAssertEqual(metrics.bucket.toggles, [:])
+    }
+
 }
