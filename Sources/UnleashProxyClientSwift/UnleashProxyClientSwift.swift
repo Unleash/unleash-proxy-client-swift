@@ -40,19 +40,22 @@ public class UnleashClientBase {
     var metrics: Metrics
 
     public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {
+        guard let url = URL(string: unleashUrl), url.scheme != nil else {
+            fatalError("Invalid Unleash URL: \(unleashUrl)")
+        }
+
         self.context["appName"] = appName
         self.context["environment"] = environment
         self.timer = nil
         if let poller = poller {
             self.poller = poller
         } else {
-            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: unleashUrl, apiKey: clientKey)
+            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey)
         }
         if let metrics = metrics {
             self.metrics = metrics
         } else {
-            let url = URL(string: unleashUrl);
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, poster: URLSession.shared.data, url: url!, clientKey: clientKey)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, poster: URLSession.shared.data, url: url, clientKey: clientKey)
         }
 
    }

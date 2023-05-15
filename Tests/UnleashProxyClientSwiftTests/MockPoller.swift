@@ -27,7 +27,7 @@ class MockPollerSession: PollerSession {
 class MockPoller: Poller {
     var dataGenerator: () -> [String: Toggle];
     
-    init(callback: @escaping () -> [String: Toggle], unleashUrl: String, apiKey: String, session: PollerSession) {
+    init(callback: @escaping () -> [String: Toggle], unleashUrl: URL, apiKey: String, session: PollerSession) {
         self.dataGenerator = callback
         super.init(refreshInterval: 15, unleashUrl: unleashUrl, apiKey: apiKey, session: session)
     }

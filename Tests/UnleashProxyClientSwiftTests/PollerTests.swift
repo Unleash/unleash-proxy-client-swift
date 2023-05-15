@@ -3,7 +3,7 @@ import XCTest
 
 final class PollerTests: XCTestCase {
 
-    private let unleashUrl = "https://app.unleash-hosted.com/hosted/api/proxy"
+    private let unleashUrl = URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!
     private let apiKey = "SECRET"
     private let timeout = 1.0
 
@@ -39,19 +39,6 @@ final class PollerTests: XCTestCase {
         XCTAssertEqual(poller.etag, "W/\"7c-GUwjw43L+nPpd9TY5PHtsXJueiM\"")
         poller.getFeatures(context: [:])
         XCTAssertEqual(poller.etag, "W/\"7c-GUwjw43L+nPpd9TY5PHtsXJueiM\"")
-    }
-
-    func testStartCompletesWithUrlError() {
-        let response = mockResponse()
-        let data = stubData()
-        let session = MockPollerSession(data: data, response: response)
-        let poller = createPoller(with: session, url: "invalid url")
-        let expectation = XCTestExpectation(description: "Expect .url PollerError.")
-        poller.start(context: [:]) { error in
-            XCTAssertEqual(error, .url)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: timeout)
     }
 
     func testStartCompletesWithoutErrorWhenDataEmpty() {
@@ -121,12 +108,12 @@ final class PollerTests: XCTestCase {
         wait(for: [expectation], timeout: timeout)
     }
 
-    private func createPoller(with session: PollerSession, url: String? = nil) -> Poller {
+    private func createPoller(with session: PollerSession, url: URL? = nil) -> Poller {
         return Poller(refreshInterval: nil, unleashUrl: url ?? unleashUrl, apiKey: apiKey, session: session)
     }
 
     private func mockResponse(statusCode: Int = 200, headerFields: [String : String]? = nil) -> URLResponse {
-        return HTTPURLResponse(url: URL(string: unleashUrl)!, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
+        return HTTPURLResponse(url: unleashUrl, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
     }
 
     private func stubData() -> Data {
