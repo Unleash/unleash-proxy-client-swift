@@ -90,7 +90,7 @@ public class Metrics {
     }
 
     func start() {
-        guard !disableMetrics else { return }
+        if disableMetrics { return }
 
         timer = Timer.scheduledTimer(withTimeInterval: metricsInterval, repeats: true) { _ in
             Task {
@@ -100,7 +100,7 @@ public class Metrics {
     }
 
     func count(name: String, enabled: Bool) {
-        guard !disableMetrics else { return }
+        if disableMetrics { return }
 
         var toggle = bucket.toggles[name] ?? ToggleMetrics()
         if enabled {
@@ -112,7 +112,7 @@ public class Metrics {
     }
 
     func countVariant(name: String, variant: String) {
-        guard !disableMetrics else { return }
+        if disableMetrics { return }
 
         var toggle = bucket.toggles[name] ?? ToggleMetrics()
         toggle.variants[variant, default: 0] += 1
