@@ -14,7 +14,7 @@ func generateBasicTestToggleMap() -> [String: Toggle] {
     var toggleMap: [String: Toggle] = [:]
     toggleMap[toggleOne.name] = toggleOne
     toggleMap[toggleTwo.name] = toggleTwo
-
+    
     return toggleMap
 }
 
@@ -23,11 +23,11 @@ func generateTestToggleMapWithVariant() -> [String: Toggle] {
     let variantB = Variant(name: "TestB", enabled: false, payload: nil)
     let toggleOne = Toggle(name: "Test", enabled: true, variant: variantA)
     let toggleTwo = Toggle(name: "TestTwo", enabled: true, variant: variantB)
-
+    
     var toggleMap: [String: Toggle] = [:]
     toggleMap[toggleOne.name] = toggleOne
     toggleMap[toggleTwo.name] = toggleTwo
-
+    
     return toggleMap
 }
 
