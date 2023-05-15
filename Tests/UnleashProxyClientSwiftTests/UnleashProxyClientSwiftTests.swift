@@ -13,6 +13,8 @@
             XCTAssert(unleash.isEnabled(name: "Test") == true)
             XCTAssert(unleash.isEnabled(name: "TestTwo") == false)
             XCTAssert(unleash.isEnabled(name: "DoesNotExist") == false)
+            let expectedToggleMetrics = ["TestTwo": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]), "DoesNotExist": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]), "Test": UnleashProxyClientSwift.ToggleMetrics(yes: 1, no: 0, variants: [:])];
+            XCTAssertEqual(unleash.metrics.bucket.toggles, expectedToggleMetrics);
         }
         
         func testGetVariant() {
@@ -29,6 +31,9 @@
             XCTAssert(variantA.name == "TestA" && variantA.enabled == true)
             XCTAssert(variantB.name == "TestB" && variantB.enabled == false)
             XCTAssert(variantC.name == "disabled") // change this to empty variant - name: disabled - enabled: false - empty payload
+            let expectedToggleMetrics = ["TestTwo": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: ["TestB": 1]), "DoesNotExist": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: ["disabled": 1]), "Test": UnleashProxyClientSwift.ToggleMetrics(yes: 1, no: 0, variants: ["TestA": 1])];
+            XCTAssertEqual(unleash.metrics.bucket.toggles, expectedToggleMetrics);
+
         }
         
         func testTimer() {
@@ -70,6 +75,8 @@
             XCTAssert(unleash.isEnabled(name: "Test") == true)
             XCTAssert(unleash.isEnabled(name: "TestTwo") == false)
             XCTAssert(unleash.isEnabled(name: "DoesNotExist") == false)
+            let expectedToggleMetrics = ["TestTwo": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]), "DoesNotExist": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]), "Test": UnleashProxyClientSwift.ToggleMetrics(yes: 1, no: 0, variants: [:])];
+            XCTAssertEqual(unleash.metrics.bucket.toggles, expectedToggleMetrics);
         }
         
         func testGetVariant() {
@@ -86,6 +93,9 @@
             XCTAssert(variantA.name == "TestA" && variantA.enabled == true)
             XCTAssert(variantB.name == "TestB" && variantB.enabled == false)
             XCTAssert(variantC.name == "disabled") // change this to empty variant - name: disabled - enabled: false - empty payload
+            let expectedToggleMetrics = ["TestTwo": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: ["TestB": 1]), "DoesNotExist": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: ["disabled": 1]), "Test": UnleashProxyClientSwift.ToggleMetrics(yes: 1, no: 0, variants: ["TestA": 1])];
+            XCTAssertEqual(unleash.metrics.bucket.toggles, expectedToggleMetrics);
+
         }
         
         func testTimer() {

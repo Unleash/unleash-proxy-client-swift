@@ -37,8 +37,9 @@ public class UnleashClientBase {
     public var context: [String: String] = [:]
     var timer: Timer?
     var poller: Poller
+    var metrics: Metrics
 
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int? = nil, appName: String? = nil, environment: String? = nil, poller: Poller? = nil) {
+    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {
         self.context["appName"] = appName
         self.context["environment"] = environment
         self.timer = nil
@@ -47,12 +48,19 @@ public class UnleashClientBase {
         } else {
             self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: unleashUrl, apiKey: clientKey)
         }
+        if let metrics = metrics {
+            self.metrics = metrics
+        } else {
+            let url = URL(string: unleashUrl);
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, poster: URLSession.shared.data, url: url!, clientKey: clientKey)
+        }
 
    }
 
     public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         Printer.showPrintStatements = printToConsole
         poller.start(context: context, completionHandler: completionHandler)
+        metrics.start()
     }
 
     public func stop() -> Void {
@@ -60,11 +68,16 @@ public class UnleashClientBase {
     }
 
     public func isEnabled(name: String) -> Bool {
-        return poller.toggles[name]?.enabled ?? false
+        let enabled = poller.toggles[name]?.enabled ?? false
+        metrics.count(name: name, enabled: enabled)
+        return enabled
     }
 
     public func getVariant(name: String) -> Variant {
-        return poller.toggles[name]?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
+        let variant = poller.toggles[name]?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
+        metrics.count(name: name, enabled: variant.enabled)
+        metrics.countVariant(name: name, variant: variant.name)
+        return variant
     }
 
     public func subscribe(name: String, callback: @escaping () -> Void) {

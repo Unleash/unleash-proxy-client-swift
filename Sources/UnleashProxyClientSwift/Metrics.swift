@@ -8,7 +8,7 @@ extension Date {
     }
 }
 
-struct ToggleMetrics {
+struct ToggleMetrics: Equatable {
     var yes: Int = 0
     var no: Int = 0
     var variants: [String: Int] = [:]
@@ -133,7 +133,8 @@ public class Metrics {
             let (_, _) = try await poster(request)
             SwiftEventBus.post("sent")
         } catch {
-            print("Metrics error: \(error)")
+            Printer.printMessage("Error sending metrics")
+            SwiftEventBus.post("error", sender: error)
         }
     }
 

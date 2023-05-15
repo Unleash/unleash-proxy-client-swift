@@ -88,10 +88,12 @@ This will stop and start the polling interval in order to renew polling with new
 
 ## Events
 
-The proxy client emits two different events you can subscribe to:
+The proxy client emits events that you can subscribe to. The following events are available:
 
 - "ready"
 - "update"
+- "sent" (metrics sent)
+- "error" (metrics sending error)
 
 Usage them in the following manner:
 ```swift
