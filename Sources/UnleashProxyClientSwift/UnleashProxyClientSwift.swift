@@ -68,6 +68,7 @@ public class UnleashClientBase {
 
     public func stop() -> Void {
         poller.stop()
+        metrics.stop()
     }
 
     public func isEnabled(name: String) -> Bool {
