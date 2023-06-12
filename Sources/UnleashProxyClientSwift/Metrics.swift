@@ -92,11 +92,15 @@ public class Metrics {
     func start() {
         if disableMetrics { return }
 
-        timer = Timer.scheduledTimer(withTimeInterval: metricsInterval, repeats: true) { _ in
+        self.timer = Timer.scheduledTimer(withTimeInterval: metricsInterval, repeats: true) { _ in
             Task {
                 await self.sendMetrics()
             }
         }
+    }
+
+    func stop() {
+        self.timer?.invalidate()
     }
 
     func count(name: String, enabled: Bool) {
