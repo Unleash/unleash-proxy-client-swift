@@ -15,9 +15,10 @@ final class MetricsTests: XCTestCase {
 
         var recordedRequestBody: Data?
 
-        let poster: (URLRequest) async throws -> (Data, URLResponse) = { request in
+        let poster: Metrics.PosterHandler = { request, completionHandler in
             recordedRequestBody = request.httpBody
-            return (Data(), HTTPURLResponse(url: URL(string: "https://unleashapi.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+            let response = HTTPURLResponse(url: URL(string: "https://unleashapi.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
+            completionHandler(.success((Data(), response!)))
         }
 
         let metrics = Metrics(appName: "TestApp",
@@ -74,8 +75,8 @@ final class MetricsTests: XCTestCase {
 
         let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
 
-        let poster: (URLRequest) async throws -> (Data, URLResponse) = { request in
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Metrics posting error"])
+        let poster: Metrics.PosterHandler = { request, completionHandler in
+            completionHandler(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Metrics posting error"])))
         }
 
         let metrics = Metrics(appName: "TestApp",
@@ -94,8 +95,8 @@ final class MetricsTests: XCTestCase {
     func testDisabledMetrics() throws {
         let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
 
-        let poster: (URLRequest) async throws -> (Data, URLResponse) = { request in
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "should never get here"])
+        let poster: Metrics.PosterHandler = { request, completionHandler in
+            completionHandler(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "should never get here"])))
         }
 
         let metrics = Metrics(appName: "TestApp",
@@ -112,5 +113,6 @@ final class MetricsTests: XCTestCase {
 
         XCTAssertEqual(metrics.bucket.toggles, [:])
     }
+
 
 }

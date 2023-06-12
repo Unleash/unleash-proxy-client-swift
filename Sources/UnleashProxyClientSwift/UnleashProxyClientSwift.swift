@@ -1,4 +1,3 @@
-
 import Foundation
 import SwiftEventBus
 
@@ -55,10 +54,20 @@ public class UnleashClientBase {
         if let metrics = metrics {
             self.metrics = metrics
         } else {
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, poster: URLSession.shared.data, url: url, clientKey: clientKey)
+            let urlSessionPoster: Metrics.PosterHandler = { request, completionHandler in
+                let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+                    if let error = error {
+                        completionHandler(.failure(error))
+                    } else if let data = data, let response = response {
+                        completionHandler(.success((data, response)))
+                    }
+                }
+                task.resume()
+            }
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, poster: urlSessionPoster, url: url, clientKey: clientKey)
         }
 
-   }
+    }
 
     public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         Printer.showPrintStatements = printToConsole
