@@ -65,7 +65,8 @@ public class Metrics {
     let appName: String
     let metricsInterval: TimeInterval
     let clientKey: String
-    let poster: (URLRequest) async throws -> (Data, URLResponse)
+    typealias PosterHandler = (URLRequest, @escaping (Result<(Data, URLResponse), Error>) -> Void) -> Void
+    let poster: PosterHandler
     let clock: () -> Date
     var disableMetrics: Bool
     var timer: Timer?
@@ -76,7 +77,7 @@ public class Metrics {
          metricsInterval: TimeInterval,
          clock: @escaping () -> Date,
          disableMetrics: Bool = false,
-         poster: @escaping (URLRequest) async throws -> (Data, URLResponse),
+         poster: @escaping PosterHandler,
          url: URL,
          clientKey: String) {
         self.appName = appName
@@ -93,9 +94,7 @@ public class Metrics {
         if disableMetrics { return }
 
         self.timer = Timer.scheduledTimer(withTimeInterval: metricsInterval, repeats: true) { _ in
-            Task {
-                await self.sendMetrics()
-            }
+            self.sendMetrics()
         }
     }
 
@@ -123,7 +122,7 @@ public class Metrics {
         bucket.toggles[name] = toggle
     }
 
-    func sendMetrics() async {
+    func sendMetrics() {
         bucket.closeBucket()
         guard !bucket.isEmpty() else { return }
 
@@ -134,10 +133,17 @@ public class Metrics {
             let payload = MetricsPayload(appName: appName, instanceId: "swift", bucket: localBucket)
             let jsonPayload = try JSONSerialization.data(withJSONObject: payload.toJson())
             let request = createRequest(payload: jsonPayload)
-            let (_, _) = try await poster(request)
-            SwiftEventBus.post("sent")
+            poster(request) { result in
+                switch result {
+                case .success(_):
+                    SwiftEventBus.post("sent")
+                case .failure(let error):
+                    Printer.printMessage("Error sending metrics")
+                    SwiftEventBus.post("error", sender: error)
+                }
+            }
         } catch {
-            Printer.printMessage("Error sending metrics")
+            Printer.printMessage("Error preparing metrics for sending")
             SwiftEventBus.post("error", sender: error)
         }
     }
@@ -153,4 +159,3 @@ public class Metrics {
         return request
     }
 }
-
