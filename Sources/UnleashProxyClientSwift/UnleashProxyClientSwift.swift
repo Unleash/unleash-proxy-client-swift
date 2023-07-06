@@ -64,7 +64,7 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, poster: urlSessionPoster, url: url, clientKey: clientKey)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey)
         }
 
     }
@@ -114,6 +114,6 @@ public class UnleashClientBase {
     }
 }
 
-@available(iOS 13, *)
+@available(iOS 13, tvOS 13, *)
 public class UnleashClient: UnleashClientBase, ObservableObject {
 }
