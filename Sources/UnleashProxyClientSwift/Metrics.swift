@@ -101,25 +101,31 @@ public class Metrics {
     func stop() {
         self.timer?.invalidate()
     }
+    
+    private let queue = DispatchQueue(label: "io.getunleash.metrics")
 
     func count(name: String, enabled: Bool) {
         if disableMetrics { return }
 
-        var toggle = bucket.toggles[name] ?? ToggleMetrics()
-        if enabled {
-            toggle.yes += 1
-        } else {
-            toggle.no += 1
+        queue.sync {
+            var toggle = bucket.toggles[name] ?? ToggleMetrics()
+            if enabled {
+                toggle.yes += 1
+            } else {
+                toggle.no += 1
+            }
+            bucket.toggles[name] = toggle
         }
-        bucket.toggles[name] = toggle
     }
 
     func countVariant(name: String, variant: String) {
         if disableMetrics { return }
 
-        var toggle = bucket.toggles[name] ?? ToggleMetrics()
-        toggle.variants[variant, default: 0] += 1
-        bucket.toggles[name] = toggle
+        queue.sync {
+            var toggle = bucket.toggles[name] ?? ToggleMetrics()
+            toggle.variants[variant, default: 0] += 1
+            bucket.toggles[name] = toggle
+        }
     }
 
     func sendMetrics() {
