@@ -34,7 +34,7 @@ public class Poller {
         self.session = session
     }
 
-    public func start(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+    public func start(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         self.getFeatures(context: context, completionHandler: completionHandler)
 
         let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
@@ -48,9 +48,9 @@ public class Poller {
         self.timer?.invalidate()
     }
 
-    func formatURL(context: [String: String]) -> URL? {
+    func formatURL(context: Context) -> URL? {
         var components = URLComponents(url: unleashUrl, resolvingAgainstBaseURL: false)
-        components?.queryItems = context.map { key, value in
+        components?.queryItems = context.toMap().map { key, value in
             URLQueryItem(name: key, value: value)
         }
 
@@ -65,7 +65,7 @@ public class Poller {
         }
     }
     
-    func getFeatures(context: [String: String], completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+    func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         guard let url = formatURL(context: context) else {
             completionHandler?(.url)
             Printer.printMessage("Invalid URL")
