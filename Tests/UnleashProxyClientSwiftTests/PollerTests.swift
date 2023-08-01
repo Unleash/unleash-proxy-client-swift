@@ -14,7 +14,7 @@ final class PollerTests: XCTestCase {
         let poller = createPoller(with: session)
 
         XCTAssertTrue(poller.etag.isEmpty)
-        poller.getFeatures(context: [:])
+        poller.getFeatures(context: Context())
         XCTAssertEqual(poller.etag, "W/\"77f-WboeNIYTrCbEJ+TK78VuhInQn2M\"")
     }
 
@@ -25,7 +25,7 @@ final class PollerTests: XCTestCase {
         let poller = createPoller(with: session)
 
         XCTAssertTrue(poller.etag.isEmpty)
-        poller.getFeatures(context: [:])
+        poller.getFeatures(context: Context())
         XCTAssertEqual(poller.etag, "W/\"710-wJiNH+MQpj0ruMo7n/9j36tB+Fg\"")
     }
 
@@ -37,7 +37,7 @@ final class PollerTests: XCTestCase {
         poller.etag = "W/\"7c-GUwjw43L+nPpd9TY5PHtsXJueiM\""
 
         XCTAssertEqual(poller.etag, "W/\"7c-GUwjw43L+nPpd9TY5PHtsXJueiM\"")
-        poller.getFeatures(context: [:])
+        poller.getFeatures(context: Context())
         XCTAssertEqual(poller.etag, "W/\"7c-GUwjw43L+nPpd9TY5PHtsXJueiM\"")
     }
 
@@ -46,7 +46,7 @@ final class PollerTests: XCTestCase {
         let session = MockPollerSession(data: nil, response: response)
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect .data PollerError.")
-        poller.start(context: [:]) { error in
+        poller.start(context: Context()) { error in
             XCTAssertNil(error)
             expectation.fulfill()
         }
@@ -59,7 +59,7 @@ final class PollerTests: XCTestCase {
         let session = MockPollerSession(data: data, response: response)
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect error to be nil.")
-        poller.start(context: [:]) { error in
+        poller.start(context: Context()) { error in
             XCTAssertNil(error)
             expectation.fulfill()
         }
@@ -73,7 +73,7 @@ final class PollerTests: XCTestCase {
             let session = MockPollerSession(data: data, response: response)
             let poller = createPoller(with: session)
             let expectation = XCTestExpectation(description: "Expect .network PollerError for status: \(statusCode).")
-            poller.start(context: [:]) { error in
+            poller.start(context: Context()) { error in
                 XCTAssertEqual(error, .network)
                 expectation.fulfill()
             }
@@ -88,7 +88,7 @@ final class PollerTests: XCTestCase {
         let session = MockPollerSession(data: data, response: response)
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect .decoding PollerError.")
-        poller.start(context: [:]) { error in
+        poller.start(context: Context()) { error in
             XCTAssertEqual(error, .decoding)
             expectation.fulfill()
         }
@@ -101,7 +101,7 @@ final class PollerTests: XCTestCase {
         let session = MockPollerSession(data: data, response: response)
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect error to be nil.")
-        poller.start(context: [:]) { error in
+        poller.start(context: Context()) { error in
             XCTAssertNil(error)
             expectation.fulfill()
         }

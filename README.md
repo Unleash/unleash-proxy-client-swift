@@ -86,6 +86,16 @@ unleash.updateContext(context: context)
 
 This will stop and start the polling interval in order to renew polling with new context values.
 
+You can use any of the [predefined fields](https://docs.getunleash.io/reference/unleash-context#structure). If you need to support
+[custom properties](https://docs.getunleash.io/reference/unleash-context#the-properties-field) pass them as the second argument:
+```swift
+var context: [String: String] = [:]
+context["userId"] = "c3b155b0-5ebe-4a20-8386-e0cab160051e"
+var properties: [String: String] = [:]
+properties["customKey"] = "customValue";
+unleash.updateContext(context: context, properties: properties)
+```
+
 ## Events
 
 The proxy client emits events that you can subscribe to. The following events are available:

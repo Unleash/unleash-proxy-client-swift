@@ -25,15 +25,10 @@ public struct Payload: Codable {
     public let type, value: String
 }
 
-struct Context {
-    let appName: String?
-    let environment: String?
-}
-
 
 @available(macOS 10.15, *)
 public class UnleashClientBase {
-    public var context: [String: String] = [:]
+    public var context: Context
     var timer: Timer?
     var poller: Poller
     var metrics: Metrics
@@ -43,8 +38,8 @@ public class UnleashClientBase {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
-        self.context["appName"] = appName
-        self.context["environment"] = environment
+        self.context = Context(appName: appName, environment: environment)
+
         self.timer = nil
         if let poller = poller {
             self.poller = poller
@@ -99,14 +94,28 @@ public class UnleashClientBase {
         }
     }
 
-    public func updateContext(context: [String: String]) -> Void {
-        var newContext: [String: String] = [:]
-        newContext["appName"] = self.context["appName"]
-        newContext["environment"] = self.context["environment"]
+    public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
+        let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
+        var newProperties: [String: String] = [:]
 
         context.forEach { (key, value) in
-            newContext[key] = value
+            if !specialKeys.contains(key) {
+                newProperties[key] = value
+            }
         }
+
+        properties?.forEach { (key, value) in
+            newProperties[key] = value
+        }
+        
+        let newContext = Context(
+            appName: self.context.appName,
+            environment: self.context.environment,
+            userId: context["userId"],
+            sessionId: context["sessionId"],
+            remoteAddress: context["remoteAddress"],
+            properties: newProperties
+        )
 
         self.context = newContext
         self.stop()
