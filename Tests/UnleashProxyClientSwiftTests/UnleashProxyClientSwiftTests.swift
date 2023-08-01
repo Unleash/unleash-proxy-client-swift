@@ -118,6 +118,7 @@
             var context: [String: String] = [:]
             context["userId"] = "uuid 123-test"
             context["sessionId"] = "uuid-234-test"
+            context["customConextKeyWorksButPreferProperties"] = "someValue";
             var properties: [String: String] = [:]
             properties["customKey"] = "customValue";
             
@@ -125,6 +126,6 @@
             
             let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
 
-            XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid%20123-test") && url.contains("environment=dev") && url.contains("properties%5BcustomKey%5D=customValue"))
+            XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid%20123-test") && url.contains("environment=dev") && url.contains("properties%5BcustomKey%5D=customValue") && url.contains("properties%5BcustomConextKeyWorksButPreferProperties%5D=someValue"))
         }
     }

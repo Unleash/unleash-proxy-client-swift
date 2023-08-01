@@ -28,7 +28,7 @@ public struct Payload: Codable {
 
 @available(macOS 10.15, *)
 public class UnleashClientBase {
-    var context: Context
+    public var context: Context
     var timer: Timer?
     var poller: Poller
     var metrics: Metrics
@@ -114,7 +114,7 @@ public class UnleashClientBase {
             userId: context["userId"],
             sessionId: context["sessionId"],
             remoteAddress: context["remoteAddress"],
-            properties: properties
+            properties: newProperties
         )
 
         self.context = newContext
