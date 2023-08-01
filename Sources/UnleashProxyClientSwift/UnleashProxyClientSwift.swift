@@ -38,7 +38,7 @@ public class UnleashClientBase {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
-        self.context = Context(appName: appName, environment: environment, properties: [:])
+        self.context = Context(appName: appName, environment: environment)
 
         self.timer = nil
         if let poller = poller {
@@ -95,7 +95,20 @@ public class UnleashClientBase {
     }
 
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
-        var newContext = Context(
+        let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
+        var newProperties: [String: String] = [:]
+
+        context.forEach { (key, value) in
+            if !specialKeys.contains(key) {
+                newProperties[key] = value
+            }
+        }
+
+        properties?.forEach { (key, value) in
+            newProperties[key] = value
+        }
+        
+        let newContext = Context(
             appName: self.context.appName,
             environment: self.context.environment,
             userId: context["userId"],
