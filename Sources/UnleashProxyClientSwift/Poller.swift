@@ -10,6 +10,8 @@ public enum PollerError: Error {
     case decoding
     case network
     case url
+    case noResponse
+    case unhandledStatusCode
 }
 
 public class Poller {
@@ -80,54 +82,62 @@ public class Poller {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         
         session.perform(request, completionHandler: { (data, response, error) in
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 304 {
-                    completionHandler?(nil)
-                    Printer.printMessage("No changes in feature toggles.")
-                    return
-                }
-                
-                if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
-                    completionHandler?(.network)
-                    Printer.printMessage("Error fetching toggles")
-                    return
-                }
-                
-                guard let data = data else {
-                    completionHandler?(nil)
-                    Printer.printMessage("No response data")
-                    return
-                }
-                
-                if httpResponse.statusCode == 200 {
-                    var result: FeatureResponse?
-                    
-                    if let etag = httpResponse.allHeaderFields["Etag"] as? String, !etag.isEmpty {
-                        self.etag = etag
-                    }
-                    
-                    do {
-                        result = try JSONDecoder().decode(FeatureResponse.self, from: data)
-                    } catch {
-                        Printer.printMessage(error.localizedDescription)
-                    }
-                    
-                    guard let json = result else {
-                        completionHandler?(.decoding)
-                        return
-                    }
-                    
-                    self.toggles = self.createFeatureMap(features: json)
-                    if (self.ready) {
-                        SwiftEventBus.post("update")
-                    } else {
-                        SwiftEventBus.post("ready")
-                        self.ready = true
-                    }
-                    
-                    completionHandler?(nil)
-                }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                Printer.printMessage("No response")
+                completionHandler?(.noResponse)
+                return
             }
+
+            if httpResponse.statusCode == 304 {
+                completionHandler?(nil)
+                Printer.printMessage("No changes in feature toggles.")
+                return
+            }
+            
+            if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
+                completionHandler?(.network)
+                Printer.printMessage("Error fetching toggles")
+                return
+            }
+            
+            guard let data = data else {
+                completionHandler?(nil)
+                Printer.printMessage("No response data")
+                return
+            }
+
+            guard httpResponse.statusCode == 200 else {
+                Printer.printMessage("Unhandled status code")
+                completionHandler?(.unhandledStatusCode)
+                return
+            }
+
+            var result: FeatureResponse?
+            
+            if let etag = httpResponse.allHeaderFields["Etag"] as? String, !etag.isEmpty {
+                self.etag = etag
+            }
+            
+            do {
+                result = try JSONDecoder().decode(FeatureResponse.self, from: data)
+            } catch {
+                Printer.printMessage(error.localizedDescription)
+            }
+            
+            guard let json = result else {
+                completionHandler?(.decoding)
+                return
+            }
+            
+            self.toggles = self.createFeatureMap(features: json)
+            if (self.ready) {
+                SwiftEventBus.post("update")
+            } else {
+                SwiftEventBus.post("ready")
+                self.ready = true
+            }
+            
+            completionHandler?(nil)
         })
     }
 }
