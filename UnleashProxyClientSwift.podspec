@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 spec.name         = "UnleashProxyClientSwift"
-spec.version      = "0.0.12"
-spec.summary      = "Allows frontend clients to talk to unleash through the unleash proxy"
+spec.version      = "1.0.0"
+spec.summary      = "Allows frontend clients to talk to unleash through the unleash edge, frontend API or the (deprecated) unleash proxy"
 spec.homepage     = "https://www.getunleash.io"
 spec.license      = { :type => "MIT", :file => "LICENSE" }
 spec.author             = { "author" => "fredrik@getunleash.io" }
