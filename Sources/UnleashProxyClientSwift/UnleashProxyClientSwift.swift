@@ -94,6 +94,10 @@ public class UnleashClientBase {
         }
     }
 
+    public func unsubscribe(name: String) {
+        SwiftEventBus.unsubscribe(self, name: name)
+    }
+
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
         var newProperties: [String: String] = [:]
