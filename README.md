@@ -5,10 +5,12 @@ The unleash-proxy-client-swift makes it easy for native applications and other s
 The unleash-proxy-client-swift will then cache these toggles in a map in memory and refresh the configuration at a configurable interval, making queries against the toggle configuration extremely fast.
 
 ## Requirements
+
 - MacOS: 12.15
 - iOS: 12
 
 ## Installation
+
 Follow the following steps in order to install the unleash-proxy-client-swift:
 
 1. In your Xcode project go to File -> Swift Packages -> Add Package Dependency
@@ -19,9 +21,11 @@ Follow the following steps in order to install the unleash-proxy-client-swift:
 Once you're done, you should see SwiftEventBus and UnleashProxyClientSwift listed as dependencies in the file explorer of your project.
 
 ## Usage
+
 In order to get started you need to import and instantiate the unleash client:
 
 ### iOS >= 13
+
 ```swift
 import SwiftUI
 import UnleashProxyClientSwift
@@ -34,6 +38,7 @@ unleash.start()
 ```
 
 ### iOS >= 12
+
 ```swift
 import SwiftUI
 import UnleashProxyClientSwift
@@ -45,11 +50,10 @@ var unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://<un
 unleash.start()
 ```
 
-
 In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters:
 
 - `unleashUrl`: the full url to either the [Unleash front-end API](https://docs.getunleash.io/reference/front-end-api) OR an [Unleash proxy](https://docs.getunleash.io/reference/unleash-proxy) [String]
-- `clientKey`: either an [client-side API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) if you use the front-end API ([how](https://docs.getunleash.io/how-to/how-to-create-api-tokens "how do I create API tokens?")) or a [proxy client key](https://docs.getunleash.io/reference/api-tokens-and-client-keys#proxy-client-keys) if you use the proxy [String]
+- `clientKey`: either an [client-side API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) if you use the front-end API ([how](https://docs.getunleash.io/how-to/how-to-create-api-tokens 'how do I create API tokens?')) or a [proxy client key](https://docs.getunleash.io/reference/api-tokens-and-client-keys#proxy-client-keys) if you use the proxy [String]
 - `refreshInterval`: the polling interval in seconds [Int]. Set to `0`to only poll once and disable a periodic polling
 - `appName`: the application name identifier [String]
 
@@ -58,6 +62,7 @@ Running `unleash.start()` will make the first request against the proxy and retr
 NOTE: While waiting to boot up the configuration may not be available, which means that asking for a feature toggle may result in a false if the configuration has not loaded. In the event that you need to be certain that the configuration is loaded we emit an event you can subscribe to, once the configuration is loaded. See more in the Events section.
 
 Once the configuration is loaded you can ask against the cache for a given feature toggle:
+
 ```swift
 if unleash.isEnabled(name: "ios") {
     // do something
@@ -67,6 +72,7 @@ if unleash.isEnabled(name: "ios") {
 ```
 
 You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants) and use them in a similar fashion:
+
 ```swift
 var variant = unleash.getVariant(name: "ios")
 if variant.enabled {
@@ -77,7 +83,9 @@ if variant.enabled {
 ```
 
 ### Update context
+
 In order to update the context you can use the following method:
+
 ```swift
 var context: [String: String] = [:]
 context["userId"] = "c3b155b0-5ebe-4a20-8386-e0cab160051e"
@@ -88,6 +96,7 @@ This will stop and start the polling interval in order to renew polling with new
 
 You can use any of the [predefined fields](https://docs.getunleash.io/reference/unleash-context#structure). If you need to support
 [custom properties](https://docs.getunleash.io/reference/unleash-context#the-properties-field) pass them as the second argument:
+
 ```swift
 var context: [String: String] = [:]
 context["userId"] = "c3b155b0-5ebe-4a20-8386-e0cab160051e"
@@ -106,6 +115,7 @@ The proxy client emits events that you can subscribe to. The following events ar
 - "error" (metrics sending error)
 
 Usage them in the following manner:
+
 ```swift
 func handleReady() {
     // do this when unleash is ready
@@ -135,6 +145,14 @@ git tag -a 0.0.4 -m "v0.0.4"
 Please make sure that that tag is pushed to remote.
 
 The next few commands assume that you have CocoaPods installed and available on your shell.
+
+First, validate your session with cocoapods with the following command:
+
+```sh
+pod trunk register <email> "Your name"
+```
+
+The email that owns this package is the general unleash team email. Cocoapods will send a link to this email, click it to validate your shell session.
 
 Bump the version number of the package, you can find this in `UnleashProxyClientSwift.podspec`, we use SemVer for this project. Once that's committed and merged to main:
 
