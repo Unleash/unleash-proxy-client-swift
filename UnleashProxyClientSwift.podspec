@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
 spec.name         = "UnleashProxyClientSwift"
-spec.version      = "1.0.0"
+spec.version      = "1.0.1"
 spec.summary      = "Allows frontend clients to talk to unleash through the unleash edge, frontend API or the (deprecated) unleash proxy"
 spec.homepage     = "https://www.getunleash.io"
 spec.license      = { :type => "MIT", :file => "LICENSE" }
@@ -13,3 +13,4 @@ spec.source_files  = "Sources/UnleashProxyClientSwift/**/*.swift"
 spec.xcconfig = { "SWIFT_VERSION" => "$(inherited)" }
 spec.dependency 'SwiftEventBus'
 end
+pod
