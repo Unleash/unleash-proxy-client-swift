@@ -13,4 +13,3 @@ spec.source_files  = "Sources/UnleashProxyClientSwift/**/*.swift"
 spec.xcconfig = { "SWIFT_VERSION" => "$(inherited)" }
 spec.dependency 'SwiftEventBus'
 end
-pod
