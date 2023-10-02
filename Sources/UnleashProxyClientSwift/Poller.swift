@@ -14,6 +14,25 @@ public enum PollerError: Error {
     case unhandledStatusCode
 }
 
+public protocol StorageProvider {
+    func set(_ value: Toggle?, for key: String)
+    func value(for key: String) -> Toggle?
+}
+
+public class DictionaryStorageProvider: StorageProvider {
+    private var storage: [String: Toggle] = [:]
+
+    public init() {}
+
+    public func set(_ value: Toggle?, for key: String) {
+        storage[key] = value
+    }
+
+    public func value(for key: String) -> Toggle? {
+        return storage[key]
+    }
+}
+
 public class Poller {
     var refreshInterval: Int?
     var unleashUrl: URL
@@ -24,8 +43,9 @@ public class Poller {
     var etag: String;
     
     private let session: PollerSession
+    private let storageProvider: StorageProvider
 
-    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared) {
+    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider()) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
@@ -34,6 +54,7 @@ public class Poller {
         self.ready = false
         self.etag = ""
         self.session = session
+        self.storageProvider = storageProvider
     }
 
     public func start(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
@@ -59,11 +80,9 @@ public class Poller {
         return components?.url
     }
     
-    private func createFeatureMap(features: FeatureResponse) -> [String: Toggle] {
-        return features.toggles.reduce([String: Toggle]()) { result, toggle in
-            var updatedResult = result
-            updatedResult[toggle.name] = toggle
-            return updatedResult
+    private func createFeatureMap(features: FeatureResponse) {
+        features.toggles.forEach { toggle in
+            self.storageProvider.set(toggle, for: toggle.name)
         }
     }
     
@@ -129,7 +148,7 @@ public class Poller {
                 return
             }
             
-            self.toggles = self.createFeatureMap(features: json)
+            self.createFeatureMap(features: json)
             if (self.ready) {
                 SwiftEventBus.post("update")
             } else {
