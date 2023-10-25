@@ -42,7 +42,7 @@ public class Poller {
     var etag: String;
     
     private let session: PollerSession
-    var storageProvider: StorageProvider
+    public var storageProvider: StorageProvider
 
     public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider()) {
         self.refreshInterval = refreshInterval
