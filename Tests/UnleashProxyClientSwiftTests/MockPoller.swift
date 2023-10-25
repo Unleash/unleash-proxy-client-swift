@@ -24,6 +24,22 @@ class MockPollerSession: PollerSession {
     }
 }
 
+public class MockDictionaryStorageProvider: StorageProvider {
+    private var storage: [String: Toggle] = [:]
+
+    public init(storage: [String: Toggle]) {
+        self.storage = storage
+    }
+
+    public func set(_ value: Toggle?, for key: String) {
+        storage[key] = value
+    }
+
+    public func value(for key: String) -> Toggle? {
+        return storage[key]
+    }
+}
+
 class MockPoller: Poller {
     var dataGenerator: () -> [String: Toggle];
     
@@ -33,6 +49,6 @@ class MockPoller: Poller {
     }
     
     override func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
-        self.toggles = dataGenerator()
+        self.storageProvider = MockDictionaryStorageProvider(storage: dataGenerator())
     }
 }
