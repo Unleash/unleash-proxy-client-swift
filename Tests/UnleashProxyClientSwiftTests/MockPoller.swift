@@ -31,11 +31,11 @@ public class MockDictionaryStorageProvider: StorageProvider {
         self.storage = storage
     }
 
-    public func set(_ value: Toggle?, for key: String) {
+    public func set(value: Toggle?, key: String) {
         storage[key] = value
     }
 
-    public func value(for key: String) -> Toggle? {
+    public func value(key: String) -> Toggle? {
         return storage[key]
     }
 }

@@ -15,8 +15,8 @@ public enum PollerError: Error {
 }
 
 public protocol StorageProvider {
-    func set(_ value: Toggle?, for key: String)
-    func value(for key: String) -> Toggle?
+    func set(value: Toggle?, key: String)
+    func value(key: String) -> Toggle?
 }
 
 public class DictionaryStorageProvider: StorageProvider {
@@ -24,11 +24,11 @@ public class DictionaryStorageProvider: StorageProvider {
 
     public init() {}
 
-    public func set(_ value: Toggle?, for key: String) {
+    public func set(value: Toggle?, key: String) {
         storage[key] = value
     }
 
-    public func value(for key: String) -> Toggle? {
+    public func value(key: String) -> Toggle? {
         return storage[key]
     }
 }
@@ -80,12 +80,12 @@ public class Poller {
     
     private func createFeatureMap(features: FeatureResponse) {
         features.toggles.forEach { toggle in
-            self.storageProvider.set(toggle, for: toggle.name)
+            self.storageProvider.set(value: toggle, key: toggle.name)
         }
     }
     
     public func getFeature(name: String) -> Toggle? {
-        return self.storageProvider.value(for: name);
+        return self.storageProvider.value(key: name);
     }
     
     func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
