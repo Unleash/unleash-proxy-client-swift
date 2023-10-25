@@ -17,6 +17,7 @@ public enum PollerError: Error {
 public protocol StorageProvider {
     func set(value: Toggle?, key: String)
     func value(key: String) -> Toggle?
+    func clear()
 }
 
 public class DictionaryStorageProvider: StorageProvider {
@@ -31,6 +32,10 @@ public class DictionaryStorageProvider: StorageProvider {
     public func value(key: String) -> Toggle? {
         return storage[key]
     }
+    
+    public func clear() {
+        storage = [:]
+    }
 }
 
 public class Poller {
@@ -42,7 +47,7 @@ public class Poller {
     var etag: String;
     
     private let session: PollerSession
-    public var storageProvider: StorageProvider
+    var storageProvider: StorageProvider
 
     public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider()) {
         self.refreshInterval = refreshInterval
@@ -79,6 +84,7 @@ public class Poller {
     }
     
     private func createFeatureMap(features: FeatureResponse) {
+        self.storageProvider.clear()
         features.toggles.forEach { toggle in
             self.storageProvider.set(value: toggle, key: toggle.name)
         }

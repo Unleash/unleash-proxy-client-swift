@@ -30,7 +30,7 @@ public struct Payload: Codable {
 public class UnleashClientBase {
     public var context: Context
     var timer: Timer?
-    public var poller: Poller
+    var poller: Poller
     var metrics: Metrics
 
     public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {

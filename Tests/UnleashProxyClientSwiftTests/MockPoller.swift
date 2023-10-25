@@ -38,6 +38,10 @@ public class MockDictionaryStorageProvider: StorageProvider {
     public func value(key: String) -> Toggle? {
         return storage[key]
     }
+    
+    public func clear() {
+        storage = [:]
+    }
 }
 
 class MockPoller: Poller {
