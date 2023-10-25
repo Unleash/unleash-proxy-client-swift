@@ -15,8 +15,9 @@ public enum PollerError: Error {
 }
 
 public protocol StorageProvider {
-    func set(_ value: Toggle?, for key: String)
-    func value(for key: String) -> Toggle?
+    func set(value: Toggle?, key: String)
+    func value(key: String) -> Toggle?
+    func clear()
 }
 
 public class DictionaryStorageProvider: StorageProvider {
@@ -24,12 +25,16 @@ public class DictionaryStorageProvider: StorageProvider {
 
     public init() {}
 
-    public func set(_ value: Toggle?, for key: String) {
+    public func set(value: Toggle?, key: String) {
         storage[key] = value
     }
 
-    public func value(for key: String) -> Toggle? {
+    public func value(key: String) -> Toggle? {
         return storage[key]
+    }
+    
+    public func clear() {
+        storage = [:]
     }
 }
 
@@ -37,20 +42,18 @@ public class Poller {
     var refreshInterval: Int?
     var unleashUrl: URL
     var timer: Timer?
-    var toggles: [String: Toggle] = [:]
     var ready: Bool
     var apiKey: String;
     var etag: String;
     
     private let session: PollerSession
-    private let storageProvider: StorageProvider
+    var storageProvider: StorageProvider
 
     public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider()) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
         self.timer = nil
-        self.toggles = [:]
         self.ready = false
         self.etag = ""
         self.session = session
@@ -81,9 +84,14 @@ public class Poller {
     }
     
     private func createFeatureMap(features: FeatureResponse) {
+        self.storageProvider.clear()
         features.toggles.forEach { toggle in
-            self.storageProvider.set(toggle, for: toggle.name)
+            self.storageProvider.set(value: toggle, key: toggle.name)
         }
+    }
+    
+    public func getFeature(name: String) -> Toggle? {
+        return self.storageProvider.value(key: name);
     }
     
     func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {

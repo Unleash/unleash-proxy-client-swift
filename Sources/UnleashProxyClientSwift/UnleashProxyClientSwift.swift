@@ -76,13 +76,13 @@ public class UnleashClientBase {
     }
 
     public func isEnabled(name: String) -> Bool {
-        let enabled = poller.toggles[name]?.enabled ?? false
+        let enabled = poller.getFeature(name: name)?.enabled ?? false
         metrics.count(name: name, enabled: enabled)
         return enabled
     }
 
     public func getVariant(name: String) -> Variant {
-        let variant = poller.toggles[name]?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
+        let variant = poller.getFeature(name: name)?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
         metrics.count(name: name, enabled: variant.enabled)
         metrics.countVariant(name: name, variant: variant.name)
         return variant
