@@ -28,13 +28,23 @@ class UnleashIntegrationTests: XCTestCase {
             let variant = self.unleashClient.getVariant(name: self.featureName)
             XCTAssertNotNil(variant, "Variant should not be nil")
             XCTAssertTrue(variant.enabled, "Variant should be enabled")
-            
-            expectation.fulfill()
         })
 
         unleashClient.start()
+        
+        self.unleashClient.updateContext(context: ["clientId": "disabled"]);
+        
+        unleashClient.subscribe(name: "update", callback: {
+            XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")
+            
+            let variant = self.unleashClient.getVariant(name: self.featureName)
+            XCTAssertNotNil(variant, "Variant should not be nil")
+            XCTAssertFalse(variant.enabled, "Variant should be disabled")
+            
+            expectation.fulfill()
+        });
 
-        wait(for: [expectation], timeout: 40)
+        wait(for: [expectation], timeout: 5)
     }
     
 }
