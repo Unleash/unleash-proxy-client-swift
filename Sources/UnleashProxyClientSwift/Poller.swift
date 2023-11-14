@@ -76,9 +76,13 @@ public class Poller {
 
     func formatURL(context: Context) -> URL? {
         var components = URLComponents(url: unleashUrl, resolvingAgainstBaseURL: false)
-        components?.queryItems = context.toMap().map { key, value in
-            URLQueryItem(name: key, value: value)
-        }
+        components?.percentEncodedQuery = context.toMap().compactMap { key, value in
+            if let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved),
+               let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved) {
+                return [encodedKey, encodedValue].joined(separator: "=")
+            }
+            return nil
+        }.joined(separator: "&")
 
         return components?.url
     }
@@ -167,4 +171,8 @@ public class Poller {
             completionHandler?(nil)
         })
     }
+}
+
+fileprivate extension CharacterSet {
+    static let rfc3986Unreserved = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
 }
