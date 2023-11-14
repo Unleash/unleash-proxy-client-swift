@@ -97,7 +97,8 @@ public class UnleashClientBase {
         SwiftEventBus.unregister(self, name: name)
     }
 
-    public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
+    /// Set the context without stopping/starting the poller.
+    public func setContext(context: [String: String], properties: [String:String]? = nil) -> Void {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
         var newProperties: [String: String] = [:]
 
@@ -110,7 +111,7 @@ public class UnleashClientBase {
         properties?.forEach { (key, value) in
             newProperties[key] = value
         }
-        
+
         let newContext = Context(
             appName: poller.context.appName,
             environment: poller.context.environment,
@@ -121,6 +122,11 @@ public class UnleashClientBase {
         )
 
         poller.context = newContext
+    }
+
+    /// Update the context and stop/start the poller.
+    public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
+        self.setContext(context: context, properties: properties)
         self.stop()
         self.start()
     }
