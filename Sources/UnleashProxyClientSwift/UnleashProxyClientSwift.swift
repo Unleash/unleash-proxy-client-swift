@@ -28,7 +28,6 @@ public struct Payload: Codable {
 
 @available(macOS 10.15, *)
 public class UnleashClientBase {
-    public var context: Context
     var timer: Timer?
     var poller: Poller
     var metrics: Metrics
@@ -38,13 +37,13 @@ public class UnleashClientBase {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
-        self.context = Context(appName: appName, environment: environment)
+        let context = Context(appName: appName, environment: environment)
 
         self.timer = nil
         if let poller = poller {
             self.poller = poller
         } else {
-            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey)
+            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey, context: context)
         }
         if let metrics = metrics {
             self.metrics = metrics
@@ -66,7 +65,7 @@ public class UnleashClientBase {
 
     public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         Printer.showPrintStatements = printToConsole
-        poller.start(context: context, completionHandler: completionHandler)
+        poller.start(completionHandler: completionHandler)
         metrics.start()
     }
 
@@ -113,15 +112,15 @@ public class UnleashClientBase {
         }
         
         let newContext = Context(
-            appName: self.context.appName,
-            environment: self.context.environment,
+            appName: poller.context.appName,
+            environment: poller.context.environment,
             userId: context["userId"],
             sessionId: context["sessionId"],
             remoteAddress: context["remoteAddress"],
             properties: newProperties
         )
 
-        self.context = newContext
+        poller.context = newContext
         self.stop()
         self.start()
     }

@@ -31,9 +31,11 @@ func generateTestToggleMapWithVariant() -> [String: Toggle] {
     return toggleMap
 }
 
+let defaultContext = Context(appName: "test", environment: "dev")
+
 @available(iOS 13, *)
-func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClient {
-    let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
+func setup(dataGenerator: @escaping () -> [String: Toggle], context: Context = defaultContext, session: PollerSession = MockPollerSession()) -> UnleashClient {
+    let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", context: context, session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)
@@ -42,8 +44,8 @@ func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSessi
     return unleash
 }
 
-func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClientBase {
-    let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
+func setupBase(dataGenerator: @escaping () -> [String: Toggle], context: Context = defaultContext, session: PollerSession = MockPollerSession()) -> UnleashClientBase {
+    let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", context: context, session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)

@@ -48,8 +48,9 @@ public class Poller {
     
     private let session: PollerSession
     var storageProvider: StorageProvider
+    var context: Context
 
-    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider()) {
+    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, context: Context, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider()) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
@@ -58,13 +59,14 @@ public class Poller {
         self.etag = ""
         self.session = session
         self.storageProvider = storageProvider
+        self.context = context
     }
 
-    public func start(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
-        self.getFeatures(context: context, completionHandler: completionHandler)
+    public func start(completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+        self.getFeatures(completionHandler: completionHandler)
 
         let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
-            self.getFeatures(context: context)
+            self.getFeatures()
         }
         self.timer = timer
         RunLoop.current.add(timer, forMode: .default)
@@ -74,7 +76,7 @@ public class Poller {
         self.timer?.invalidate()
     }
 
-    func formatURL(context: Context) -> URL? {
+    func formatURL() -> URL? {
         var components = URLComponents(url: unleashUrl, resolvingAgainstBaseURL: false)
         components?.percentEncodedQuery = context.toMap().compactMap { key, value in
             if let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved),
@@ -98,8 +100,8 @@ public class Poller {
         return self.storageProvider.value(key: name);
     }
     
-    func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
-        guard let url = formatURL(context: context) else {
+    func getFeatures(completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+        guard let url = formatURL() else {
             completionHandler?(.url)
             Printer.printMessage("Invalid URL")
             return

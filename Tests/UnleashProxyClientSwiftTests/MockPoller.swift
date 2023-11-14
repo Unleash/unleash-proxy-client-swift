@@ -47,12 +47,12 @@ public class MockDictionaryStorageProvider: StorageProvider {
 class MockPoller: Poller {
     var dataGenerator: () -> [String: Toggle];
     
-    init(callback: @escaping () -> [String: Toggle], unleashUrl: URL, apiKey: String, session: PollerSession) {
+    init(callback: @escaping () -> [String: Toggle], unleashUrl: URL, apiKey: String, context: Context, session: PollerSession) {
         self.dataGenerator = callback
-        super.init(refreshInterval: 15, unleashUrl: unleashUrl, apiKey: apiKey, session: session)
+        super.init(refreshInterval: 15, unleashUrl: unleashUrl, apiKey: apiKey, context: context, session: session)
     }
     
-    override func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+    override func getFeatures(completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         self.storageProvider = MockDictionaryStorageProvider(storage: dataGenerator())
     }
 }
