@@ -116,16 +116,23 @@
             let unleash = setupBase(dataGenerator: dataGenerator)
             
             var context: [String: String] = [:]
-            context["userId"] = "uuid 123-test"
+            context["userId"] = "uuid 123+test"
             context["sessionId"] = "uuid-234-test"
-            context["customConextKeyWorksButPreferProperties"] = "someValue";
+            context["customContextKeyWorksButPreferProperties"] = "someValue";
             var properties: [String: String] = [:]
             properties["customKey"] = "customValue";
-            
+            properties["custom+Key"] = "custom+Value";
+
             unleash.updateContext(context: context, properties: properties)
             
             let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
 
-            XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid%20123-test") && url.contains("environment=dev") && url.contains("properties%5BcustomKey%5D=customValue") && url.contains("properties%5BcustomConextKeyWorksButPreferProperties%5D=someValue"))
+            XCTAssert(url.contains("appName=test"), url)
+            XCTAssert(url.contains("sessionId=uuid-234-test"), url)
+            XCTAssert(url.contains("userId=uuid%20123%2Btest"), url)
+            XCTAssert(url.contains("environment=dev"), url)
+            XCTAssert(url.contains("properties%5BcustomKey%5D=customValue"), url)
+            XCTAssert(url.contains("properties%5BcustomContextKeyWorksButPreferProperties%5D=someValue"), url)
+            XCTAssert(url.contains("properties%5Bcustom%2BKey%5D=custom%2BValue"), url)
         }
     }
