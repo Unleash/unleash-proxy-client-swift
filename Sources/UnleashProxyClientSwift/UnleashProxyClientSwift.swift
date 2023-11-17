@@ -124,16 +124,22 @@ public class UnleashClientBase {
         SwiftEventBus.unregister(self, name: name)
     }
 
+    public func updateContext(_ newContext: Context) -> Void {
+        self.context = newContext
+        self.stop()
+        self.start()
+    }
+
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
         var newProperties: [String: String] = [:]
-
+        
         context.forEach { (key, value) in
             if !specialKeys.contains(key) {
                 newProperties[key] = value
             }
         }
-
+        
         properties?.forEach { (key, value) in
             newProperties[key] = value
         }
@@ -146,10 +152,8 @@ public class UnleashClientBase {
             remoteAddress: context["remoteAddress"],
             properties: newProperties
         )
-
-        self.context = newContext
-        self.stop()
-        self.start()
+        
+        self.updateContext(newContext)
     }
 }
 
