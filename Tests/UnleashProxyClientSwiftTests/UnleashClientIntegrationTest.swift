@@ -19,30 +19,42 @@ class UnleashIntegrationTests: XCTestCase {
         unleashClient.stop()
     }
 
-    func testEnabledFeatureWithVariant() {
-        let expectation = self.expectation(description: "Waiting for client ready")
+    func testUserJourneyHappyPath() {
+        let expectation = self.expectation(description: "Waiting for client updates")
+        var updateCount = 0
 
         unleashClient.subscribe(name: "ready", callback: {
             XCTAssertTrue(self.unleashClient.isEnabled(name: self.featureName), "Feature should be enabled")
-            
+
             let variant = self.unleashClient.getVariant(name: self.featureName)
             XCTAssertNotNil(variant, "Variant should not be nil")
             XCTAssertTrue(variant.enabled, "Variant should be enabled")
         })
-
-        unleashClient.start()
-        
-        self.unleashClient.updateContext(context: ["clientId": "disabled"]);
         
         unleashClient.subscribe(name: "update", callback: {
-            XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")
+            updateCount += 1
             
-            let variant = self.unleashClient.getVariant(name: self.featureName)
-            XCTAssertNotNil(variant, "Variant should not be nil")
-            XCTAssertFalse(variant.enabled, "Variant should be disabled")
-            
-            expectation.fulfill()
+            if updateCount == 1 {
+                XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")
+
+                let variant = self.unleashClient.getVariant(name: self.featureName)
+                XCTAssertNotNil(variant, "Variant should not be nil")
+                XCTAssertFalse(variant.enabled, "Variant should be disabled")
+
+                self.unleashClient.updateContext(context: ["clientId": "enabled"]);
+            } else if updateCount == 2 {
+                XCTAssertTrue(self.unleashClient.isEnabled(name: self.featureName), "Feature should be enabled")
+                let variant = self.unleashClient.getVariant(name: self.featureName)
+                XCTAssertTrue(variant.enabled, "Variant should be enabled")
+                XCTAssert(variant.name == "feature-variant")
+                
+                expectation.fulfill()
+            }
         });
+
+        unleashClient.start()
+
+        self.unleashClient.updateContext(context: ["clientId": "disabled"]);
 
         wait(for: [expectation], timeout: 5)
     }
