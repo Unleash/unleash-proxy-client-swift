@@ -1,10 +1,10 @@
 public struct Context {
     public let appName: String
     public let environment: String?
-    public let userId: String?
-    public let sessionId: String?
-    public let remoteAddress: String?
-    public let properties: [String: String]?
+    public var userId: String?
+    public var sessionId: String?
+    public var remoteAddress: String?
+    public var properties: [String: String]
 
     public init(
         appName: String? = nil,
@@ -12,7 +12,7 @@ public struct Context {
         userId: String? = nil,
         sessionId: String? = nil,
         remoteAddress: String? = nil,
-        properties: [String: String]? = nil
+        properties: [String: String] = [:]
     ) {
         self.appName = appName ?? "unleash-swift-client"
         self.environment = environment
@@ -37,7 +37,7 @@ public struct Context {
         if let remoteAddress = self.remoteAddress {
             params["remoteAddress"] = remoteAddress
         }
-        properties?.forEach { (key, value) in
+        properties.forEach { (key, value) in
             params["properties[\(key)]"] = value
         }
         return params
