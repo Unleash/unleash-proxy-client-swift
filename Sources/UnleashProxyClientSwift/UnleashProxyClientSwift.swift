@@ -33,12 +33,38 @@ public class UnleashClientBase {
     var poller: Poller
     var metrics: Metrics
 
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {
+    public convenience init(unleashUrl: String,
+                            clientKey: String,
+                            refreshInterval: Int = 15,
+                            metricsInterval: Int = 30,
+                            disableMetrics: Bool = false,
+                            appName: String? = nil,
+                            environment: String? = nil,
+                            poller: Poller? = nil,
+                            metrics: Metrics? = nil) {
+        self.init(unleashUrl: unleashUrl,
+                  clientKey: clientKey,
+                  refreshInterval: refreshInterval,
+                  metricsInterval: metricsInterval,
+                  disableMetrics: disableMetrics,
+                  context: Context(appName: appName, environment: environment),
+                  poller: poller,
+                  metrics: metrics)
+    }
+
+    public init(unleashUrl: String,
+                clientKey: String,
+                refreshInterval: Int = 15,
+                metricsInterval: Int = 30,
+                disableMetrics: Bool = false,
+                context: Context,
+                poller: Poller? = nil,
+                metrics: Metrics? = nil) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
-        self.context = Context(appName: appName, environment: environment)
+        self.context = context
 
         self.timer = nil
         if let poller = poller {
@@ -59,7 +85,7 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey)
+            self.metrics = Metrics(appName: context.appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey)
         }
 
     }

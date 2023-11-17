@@ -1,12 +1,12 @@
 public struct Context {
-    let appName: String?
-    let environment: String?
-    var userId: String?
-    var sessionId: String?
-    var remoteAddress: String?
-    var properties: [String: String]?
-    
-    init(
+    public let appName: String
+    public let environment: String?
+    public let userId: String?
+    public let sessionId: String?
+    public let remoteAddress: String?
+    public let properties: [String: String]?
+
+    public init(
         appName: String? = nil,
         environment: String? = nil,
         userId: String? = nil,
@@ -14,7 +14,7 @@ public struct Context {
         remoteAddress: String? = nil,
         properties: [String: String]? = nil
     ) {
-        self.appName = appName
+        self.appName = appName ?? "unleash-swift-client"
         self.environment = environment
         self.userId = userId
         self.sessionId = sessionId
@@ -24,20 +24,18 @@ public struct Context {
     
     func toMap() -> [String: String] {
         var params: [String: String] = [:]
+        params["appName"] = appName
+        if let environment = self.environment {
+            params["environment"] = environment
+        }
         if let userId = self.userId {
             params["userId"] = userId
-        }
-        if let remoteAddress = self.remoteAddress {
-            params["remoteAddress"] = remoteAddress
         }
         if let sessionId = self.sessionId {
             params["sessionId"] = sessionId
         }
-        if let appName = self.appName {
-            params["appName"] = appName
-        }
-        if let environment = self.environment {
-            params["environment"] = environment
+        if let remoteAddress = self.remoteAddress {
+            params["remoteAddress"] = remoteAddress
         }
         properties?.forEach { (key, value) in
             params["properties[\(key)]"] = value
