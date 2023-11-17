@@ -133,17 +133,17 @@ public class UnleashClientBase {
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
         var newProperties: [String: String] = [:]
-        
+
         context.forEach { (key, value) in
             if !specialKeys.contains(key) {
                 newProperties[key] = value
             }
         }
-        
+
         properties?.forEach { (key, value) in
             newProperties[key] = value
         }
-        
+
         let newContext = Context(
             appName: self.context.appName,
             environment: self.context.environment,
@@ -152,7 +152,7 @@ public class UnleashClientBase {
             remoteAddress: context["remoteAddress"],
             properties: newProperties
         )
-        
+
         self.updateContext(newContext)
     }
 }
