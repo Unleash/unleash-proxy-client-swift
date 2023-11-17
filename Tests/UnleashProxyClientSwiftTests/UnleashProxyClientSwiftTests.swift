@@ -135,4 +135,31 @@
             XCTAssert(url.contains("properties%5BcustomContextKeyWorksButPreferProperties%5D=someValue"), url)
             XCTAssert(url.contains("properties%5Bcustom%2BKey%5D=custom%2BValue"), url)
         }
+
+        func testUpdateContextBeforeStartInvalidatesExistingTimer() {
+            func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
+                return generateTestToggleMapWithVariant()
+            }
+
+            let unleash = setupBase(dataGenerator: dataGenerator, callStart: false)
+
+            var context: [String: String] = [:]
+            context["userId"] = "uuid 123+test"
+            context["sessionId"] = "uuid-234-test"
+            context["customContextKeyWorksButPreferProperties"] = "someValue";
+            var properties: [String: String] = [:]
+            properties["customKey"] = "customValue";
+            properties["custom+Key"] = "custom+Value";
+
+            unleash.updateContext(context: context, properties: properties)
+
+            let timer1 = unleash.poller.timer
+
+            unleash.start()
+
+            let timer2 = unleash.poller.timer
+
+            XCTAssertFalse(timer1!.isValid)
+            XCTAssertTrue(timer2!.isValid)
+        }
     }

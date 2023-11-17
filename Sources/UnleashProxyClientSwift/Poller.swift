@@ -63,6 +63,9 @@ public class Poller {
     public func start(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         self.getFeatures(context: context, completionHandler: completionHandler)
 
+        // Invalidate timer if we've already called start
+        self.timer?.invalidate()
+
         let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
             self.getFeatures(context: context)
         }

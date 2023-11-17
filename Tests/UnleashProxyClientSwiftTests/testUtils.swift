@@ -42,12 +42,14 @@ func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSessi
     return unleash
 }
 
-func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClientBase {
+func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession(), callStart: Bool = true) -> UnleashClientBase {
     let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)
 
-    unleash.start()
+    if callStart {
+        unleash.start()
+    }
     return unleash
 }
