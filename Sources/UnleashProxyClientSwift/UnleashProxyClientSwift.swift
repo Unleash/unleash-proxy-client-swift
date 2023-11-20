@@ -68,6 +68,7 @@ public class UnleashClientBase {
 
     public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         Printer.showPrintStatements = printToConsole
+        self.stop()
         poller.start(context: context, completionHandler: completionHandler)
         metrics.start()
     }
@@ -102,7 +103,6 @@ public class UnleashClientBase {
     
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
         self.context = self.calculateContext(context: context, properties: properties)
-        self.stop()
         self.start()
     }
 
