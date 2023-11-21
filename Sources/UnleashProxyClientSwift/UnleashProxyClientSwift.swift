@@ -68,6 +68,7 @@ public class UnleashClientBase {
 
     public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         Printer.showPrintStatements = printToConsole
+        self.stop()
         poller.start(context: context, completionHandler: completionHandler)
         metrics.start()
     }
