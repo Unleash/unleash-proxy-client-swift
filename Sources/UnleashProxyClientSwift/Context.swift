@@ -1,12 +1,12 @@
 public struct Context {
-    let appName: String?
-    let environment: String?
-    var userId: String?
-    var sessionId: String?
-    var remoteAddress: String?
-    var properties: [String: String]?
+    public let appName: String?
+    public let environment: String?
+    public var userId: String?
+    public var sessionId: String?
+    public var remoteAddress: String?
+    public var properties: [String: String]?
     
-    init(
+    public init(
         appName: String? = nil,
         environment: String? = nil,
         userId: String? = nil,
