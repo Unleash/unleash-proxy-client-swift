@@ -33,12 +33,10 @@ public class UnleashClientBase {
     var poller: Poller
     var metrics: Metrics
 
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {
+    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = "default", context: [String: String]? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
-
-        self.context = Context(appName: appName, environment: environment)
 
         self.timer = nil
         if let poller = poller {
@@ -61,7 +59,11 @@ public class UnleashClientBase {
             }
             self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey)
         }
-
+        
+        self.context = Context(appName: appName, environment: environment)
+        if let providedContext = context {
+            self.context = self.calculateContext(context: providedContext)
+        }
     }
 
     public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
@@ -97,8 +99,14 @@ public class UnleashClientBase {
     public func unsubscribe(name: String) {
         SwiftEventBus.unregister(self, name: name)
     }
-
+    
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
+        self.context = self.calculateContext(context: context, properties: properties)
+        self.stop()
+        self.start()
+    }
+
+    func calculateContext(context: [String: String], properties: [String:String]? = nil) -> Context {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
         var newProperties: [String: String] = [:]
 
@@ -121,9 +129,7 @@ public class UnleashClientBase {
             properties: newProperties
         )
 
-        self.context = newContext
-        self.stop()
-        self.start()
+        return newContext
     }
 }
 
