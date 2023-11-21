@@ -22,6 +22,8 @@ class UnleashIntegrationTests: XCTestCase {
 
     func testUserJourneyHappyPath() {
         let expectation = self.expectation(description: "Waiting for client updates")
+        
+        XCTAssertEqual(unleashClient.context.toMap(), ["environment": "default", "clientId": "disabled", "appName": "testIntegration"])
 
         unleashClient.subscribe(name: "ready", callback: {
             XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")

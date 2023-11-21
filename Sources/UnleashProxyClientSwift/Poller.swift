@@ -76,7 +76,7 @@ public class Poller {
 
     func formatURL(context: Context) -> URL? {
         var components = URLComponents(url: unleashUrl, resolvingAgainstBaseURL: false)
-        components?.percentEncodedQuery = context.toMap().compactMap { key, value in
+        components?.percentEncodedQuery = context.toURIMap().compactMap { key, value in
             if let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved),
                let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved) {
                 return [encodedKey, encodedValue].joined(separator: "=")
