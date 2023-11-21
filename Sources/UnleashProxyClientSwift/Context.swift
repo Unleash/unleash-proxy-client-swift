@@ -22,7 +22,31 @@ public struct Context {
         self.properties = properties
     }
     
-    func toMap() -> [String: String] {
+    public func toMap() -> [String: String] {
+        var params: [String: String] = [:]
+        properties?.forEach { (key, value) in
+            params[key] = value
+        }
+        if let userId = self.userId {
+            params["userId"] = userId
+        }
+        if let remoteAddress = self.remoteAddress {
+            params["remoteAddress"] = remoteAddress
+        }
+        if let sessionId = self.sessionId {
+            params["sessionId"] = sessionId
+        }
+        if let appName = self.appName {
+            params["appName"] = appName
+        }
+        if let environment = self.environment {
+            params["environment"] = environment
+        }
+        
+        return params
+    }
+    
+    func toURIMap() -> [String: String] {
         var params: [String: String] = [:]
         if let userId = self.userId {
             params["userId"] = userId

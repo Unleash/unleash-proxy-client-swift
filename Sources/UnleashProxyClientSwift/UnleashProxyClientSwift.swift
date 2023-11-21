@@ -103,6 +103,7 @@ public class UnleashClientBase {
     
     public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
         self.context = self.calculateContext(context: context, properties: properties)
+        self.stop()
         self.start()
     }
 

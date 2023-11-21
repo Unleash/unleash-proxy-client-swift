@@ -32,7 +32,7 @@ import UnleashProxyClientSwift
 
 // Setup Unleash in the context where it makes most sense
 
-var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test")
+var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test", context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"])
 
 unleash.start()
 ```
@@ -45,7 +45,7 @@ import UnleashProxyClientSwift
 
 // Setup Unleash in the context where it makes most sense
 
-var unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test")
+var unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test", context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"])
 
 unleash.start()
 ```
@@ -56,6 +56,7 @@ In the example above we import the UnleashProxyClientSwift and instantiate the c
 - `clientKey`: either an [client-side API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) if you use the front-end API ([how](https://docs.getunleash.io/how-to/how-to-create-api-tokens 'how do I create API tokens?')) or a [proxy client key](https://docs.getunleash.io/reference/api-tokens-and-client-keys#proxy-client-keys) if you use the proxy [String]
 - `refreshInterval`: the polling interval in seconds [Int]. Set to `0`to only poll once and disable a periodic polling
 - `appName`: the application name identifier [String]
+- `context`: the context parameters except from `appName` and `environment` which should be specified explicitly in the init [[String: String]]
 
 Running `unleash.start()` will make the first request against the proxy and retrieve the feature toggle configuration, and set up the polling interval in the background.
 
@@ -104,6 +105,7 @@ var properties: [String: String] = [:]
 properties["customKey"] = "customValue";
 unleash.updateContext(context: context, properties: properties)
 ```
+
 
 ## Events
 
