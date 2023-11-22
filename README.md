@@ -96,6 +96,7 @@ The Unleash SDK takes the following options:
 | refreshInterval   | no | 15                        | How often, in seconds, the SDK should check for updated toggle configuration. If set to 0 will disable checking for updates                 |
 | metricsInterval   | no | 30                        | How often, in seconds, the SDK should send usage metrics back to Unleash Proxy                                                              | 
 | disableMetrics    | no | false                     | Set this option to `true` if you want to disable usage metrics
+| context    | no | [:]                     | The initial context parameters except from `appName` and `environment which are specified as top level fields
 
 ### Update context
 
