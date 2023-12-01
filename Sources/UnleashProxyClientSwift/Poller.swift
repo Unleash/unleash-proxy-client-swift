@@ -28,19 +28,19 @@ public class DictionaryStorageProvider: StorageProvider {
 
     public func set(value: Toggle?, key: String) {
         queue.async(flags: .barrier) {
-            storage[key] = value
+            self.storage[key] = value
         }
     }
 
     public func value(key: String) -> Toggle? {
         queue.sync {
-            return storage[key]
+            return self.storage[key]
         }
     }
     
     public func clear() {
         queue.sync {
-            storage = [:]
+            self.storage = [:]
         }
     }
 }
