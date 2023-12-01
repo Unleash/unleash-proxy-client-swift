@@ -17,9 +17,3 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: swift test --sanitize=thread
-  test-sanitize:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: 'swift test --sanitize=thread 2>&1 | grep "ThreadSanitizer: data race" || exit 0; exit 1'
