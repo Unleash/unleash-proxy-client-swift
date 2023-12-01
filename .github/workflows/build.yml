@@ -12,4 +12,4 @@ jobs:
       - name: Build
         run: swift build
       - name: Run tests
-        run: swift test --sanitize=thread
+        run: 'swift test --sanitize=thread 2>&1 | grep "ThreadSanitizer: data race" && exit 1'
