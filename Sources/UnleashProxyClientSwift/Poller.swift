@@ -22,19 +22,26 @@ public protocol StorageProvider {
 
 public class DictionaryStorageProvider: StorageProvider {
     private var storage: [String: Toggle] = [:]
+    private let queue = DispatchQueue(label: "com.unleash.storageprovider", attributes: .concurrent)
 
     public init() {}
 
     public func set(value: Toggle?, key: String) {
-        storage[key] = value
+        queue.async(flags: .barrier) {
+            storage[key] = value
+        }
     }
 
     public func value(key: String) -> Toggle? {
-        return storage[key]
+        queue.sync {
+            return storage[key]
+        }
     }
     
     public func clear() {
-        storage = [:]
+        queue.sync {
+            storage = [:]
+        }
     }
 }
 
