@@ -45,6 +45,13 @@ class UnleashIntegrationTests: XCTestCase {
         });
 
         unleashClient.start()
+        // Run isEnabled many times to trigger a data race when the poller is updating the data cache
+        // This is to test that the poller is thread safe, and you can verify this by running the test with
+        // swift test --sanitize=thread
+        for _ in 1...15000 {
+            let result = unleashClient.isEnabled(name: "dataRaceTest")
+            XCTAssertFalse(result)
+        }
 
         wait(for: [expectation], timeout: 5)
     }

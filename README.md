@@ -184,3 +184,13 @@ Once that succeeds, you can do the actual release:
 ```sh
 pod trunk push UnleashProxyClientSwift.podspec --allow-warnings
 ```
+
+## Testing
+
+In order to test this package you can run the swift test command. To test thread safety, run swift test with:
+
+```
+swift test --sanitize=thread
+```
+
+This will give you warnings in the console when you have any data races.
