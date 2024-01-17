@@ -101,10 +101,9 @@ public class UnleashClientBase {
         SwiftEventBus.unregister(self, name: name)
     }
     
-    public func updateContext(context: [String: String], properties: [String:String]? = nil) -> Void {
+    public func updateContext(context: [String: String], properties: [String:String]? = nil, completionHandler: ((PollerError?) -> Void)? = nil) {
         self.context = self.calculateContext(context: context, properties: properties)
-        self.stop()
-        self.start()
+        self.start(completionHandler: completionHandler)
     }
 
     func calculateContext(context: [String: String], properties: [String:String]? = nil) -> Context {
