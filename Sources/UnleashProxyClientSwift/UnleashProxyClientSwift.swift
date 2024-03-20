@@ -10,7 +10,7 @@ struct FeatureResponse: Codable {
 public struct Toggle: Codable {
     public let name: String
     public let enabled: Bool
-    public let variant: Variant
+    public let variant: Variant?
 }
 
 // MARK: - Variant
