@@ -122,7 +122,6 @@ final class PollerTests: XCTestCase {
                 [
                     "name": "foo",
                     "enabled": true,
-                    "variant": ["name": "disabled", "enabled": false]
                 ],
                 [
                     "name": "bar",
