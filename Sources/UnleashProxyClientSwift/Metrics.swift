@@ -72,6 +72,7 @@ public class Metrics {
     var timer: Timer?
     var bucket: Bucket
     let url: URL
+    let customClientHeaders: [String: String]
 
     init(appName: String,
          metricsInterval: TimeInterval,
@@ -79,7 +80,8 @@ public class Metrics {
          disableMetrics: Bool = false,
          poster: @escaping PosterHandler,
          url: URL,
-         clientKey: String) {
+         clientKey: String,
+         customClientHeaders: [String: String] = [:]) {
         self.appName = appName
         self.metricsInterval = metricsInterval
         self.clock = clock
@@ -88,6 +90,7 @@ public class Metrics {
         self.url = url
         self.clientKey = clientKey
         self.bucket = Bucket(clock: clock)
+        self.customClientHeaders = customClientHeaders
     }
 
     func start() {
@@ -162,6 +165,11 @@ public class Metrics {
         request.addValue("no-cache", forHTTPHeaderField: "Cache")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue(clientKey, forHTTPHeaderField: "Authorization")
+        if !self.customClientHeaders.isEmpty {
+            for (key, value) in self.customClientHeaders {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
         return request
     }
 }

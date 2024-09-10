@@ -33,7 +33,7 @@ public class UnleashClientBase {
     var poller: Poller
     var metrics: Metrics
 
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = "default", context: [String: String]? = nil, poller: Poller? = nil, metrics: Metrics? = nil) {
+    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = "default", context: [String: String]? = nil, poller: Poller? = nil, metrics: Metrics? = nil, customClientHeaders: [String: String] = [:]) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
@@ -42,7 +42,7 @@ public class UnleashClientBase {
         if let poller = poller {
             self.poller = poller
         } else {
-            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey)
+            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey, customClientHeaders: customClientHeaders)
         }
         if let metrics = metrics {
             self.metrics = metrics
@@ -57,7 +57,7 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customClientHeaders: customClientHeaders)
         }
         
         self.context = Context(appName: appName, environment: environment)
