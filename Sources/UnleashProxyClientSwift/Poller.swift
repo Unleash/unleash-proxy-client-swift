@@ -55,9 +55,9 @@ public class Poller {
     
     private let session: PollerSession
     var storageProvider: StorageProvider
-    let customClientHeaders: [String: String]
+    let customHeaders: [String: String]
 
-    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider(), customClientHeaders: [String: String] = [:]) {
+    public init(refreshInterval: Int? = nil, unleashUrl: URL, apiKey: String, session: PollerSession = URLSession.shared, storageProvider: StorageProvider = DictionaryStorageProvider(), customHeaders: [String: String] = [:]) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
@@ -66,7 +66,7 @@ public class Poller {
         self.etag = ""
         self.session = session
         self.storageProvider = storageProvider
-        self.customClientHeaders = customClientHeaders
+        self.customHeaders = customHeaders
     }
 
     public func start(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
@@ -119,8 +119,8 @@ public class Poller {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.apiKey, forHTTPHeaderField: "Authorization")
         request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
-        if !self.customClientHeaders.isEmpty {
-            for (key, value) in self.customClientHeaders {
+        if !self.customHeaders.isEmpty {
+            for (key, value) in self.customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)
             }
         }

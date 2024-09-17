@@ -89,14 +89,15 @@ The Unleash SDK takes the following options:
 
 | option            | required | default                   | description                                                                                                                                      |
 |-------------------|----------|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| unleashUrl        | yes | n/a                       | The Unleash Proxy URL to connect to. E.g.: `https://examples.com/proxy`                                                                         |
-| clientKey         | yes | n/a                       | The Unleash Proxy Secret to be used                                                                                                             | 
-| appName           | no | unleash-swift-client       | The name of the application using this SDK. Will be used as part of the metrics sent to Unleash Proxy. Will also be part of the Unleash Context. |
-| environment       | no | default                    | The name of the environment using this SDK. Will be used as part of the metrics sent to Unleash Proxy. Will also be part of the Unleash Context. | 
+| unleashUrl        | yes | n/a                       | The Unleash Edge/Proxy URL to connect to. E.g.: `https://examples.com/proxy`                                                                         |
+| clientKey         | yes | n/a                       | The Unleash Edge/Proxy Secret to be used                                                                                                             | 
+| appName           | no | unleash-swift-client       | The name of the application using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context. |
+| environment       | no | default                    | The name of the environment using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context. | 
 | refreshInterval   | no | 15                        | How often, in seconds, the SDK should check for updated toggle configuration. If set to 0 will disable checking for updates                 |
-| metricsInterval   | no | 30                        | How often, in seconds, the SDK should send usage metrics back to Unleash Proxy                                                              | 
+| metricsInterval   | no | 30                        | How often, in seconds, the SDK should send usage metrics back to Unleash Edge/Proxy                                                              | 
 | disableMetrics    | no | false                     | Set this option to `true` if you want to disable usage metrics
 | context    | no | [:]                     | The initial context parameters except from `appName` and `environment which are specified as top level fields
+| customHeaders     | no| `[:]`                      | Additional headers to use when making HTTP requests to the Unleash Edge/Proxy. In case of name collisions with the default headers, the `customHeaders` value will be used. |
 
 ### Update context
 
