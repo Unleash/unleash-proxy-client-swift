@@ -11,8 +11,10 @@ import Foundation
 class MockPollerSession: PollerSession {
     var data: Data?
     var response: URLResponse?
-    var error: Error?
-
+    var error: Error?    
+    
+    var performRequestHandler: ((URLRequest) -> Void)?
+    
     init(data: Data? = nil, response: URLResponse? = nil, error: Error? = nil) {
         self.data = data
         self.response = response
@@ -20,6 +22,7 @@ class MockPollerSession: PollerSession {
     }
 
     func perform(_ request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) {
+        performRequestHandler?(request)
         completionHandler(data, response, error)
     }
 }

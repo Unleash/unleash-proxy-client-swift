@@ -107,6 +107,25 @@ final class PollerTests: XCTestCase {
         }
         wait(for: [expectation], timeout: timeout)
     }
+    
+    func testCustomHeaders() {
+        let customHeaders: [String: String] = ["X-Custom-Header": "CustomValue", "X-Another-Header": "AnotherValue"]
+        let response = mockResponse()
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = Poller(refreshInterval: nil, unleashUrl: unleashUrl, apiKey: apiKey, session: session, customHeaders: customHeaders)
+
+        let expectation = XCTestExpectation(description: "Expect custom headers to be set in the request.")
+
+        session.performRequestHandler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "X-Custom-Header"), "CustomValue")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "X-Another-Header"), "AnotherValue")
+            expectation.fulfill()
+        }
+
+        poller.getFeatures(context: Context())
+        wait(for: [expectation], timeout: timeout)
+    }
 
     private func createPoller(with session: PollerSession, url: URL? = nil) -> Poller {
         return Poller(refreshInterval: nil, unleashUrl: url ?? unleashUrl, apiKey: apiKey, session: session)
