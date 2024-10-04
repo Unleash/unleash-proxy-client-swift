@@ -25,6 +25,17 @@ public struct Payload: Codable {
     public let type, value: String
 }
 
+public enum UnleashEvent: String, CaseIterable {
+    /// Emitted when UnleashClient is ready after finished first flag fetch
+    case ready
+    /// Emitted when toggles have been updated
+    case update
+    /// Emitted on metrics sent
+    case sent
+    /// Emitted when metrics failed to send
+    case error
+}
+
 
 @available(macOS 10.15, *)
 public class UnleashClientBase {
@@ -96,9 +107,17 @@ public class UnleashClientBase {
             callback()
         }
     }
+    
+    public func subscribe(_ event: UnleashEvent, callback: @escaping () -> Void) {
+        subscribe(name: event.rawValue, callback: callback)
+    }
 
     public func unsubscribe(name: String) {
         SwiftEventBus.unregister(self, name: name)
+    }
+    
+    public func unsubscribe(_ event: UnleashEvent) {
+        unsubscribe(name: event.rawValue)
     }
     
     public func updateContext(context: [String: String], properties: [String:String]? = nil, completionHandler: ((PollerError?) -> Void)? = nil) {
