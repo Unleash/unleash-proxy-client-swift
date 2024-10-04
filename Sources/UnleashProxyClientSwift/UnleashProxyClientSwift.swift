@@ -118,6 +118,19 @@ public class UnleashClientBase {
     public func updateContext(context: [String: String], properties: [String:String]? = nil, completionHandler: ((PollerError?) -> Void)? = nil) {
         self.context = self.calculateContext(context: context, properties: properties)
         self.start(completionHandler: completionHandler)
+    
+    @available(iOS 13.0, *)
+    @MainActor
+    public func updateContext(context: [String: String], properties: [String:String]? = nil) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            updateContext(context: context, properties: properties) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
     }
 
     func calculateContext(context: [String: String], properties: [String:String]? = nil) -> Context {
