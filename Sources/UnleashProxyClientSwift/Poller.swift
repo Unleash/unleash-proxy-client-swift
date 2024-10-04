@@ -176,8 +176,10 @@ public class Poller {
             
             self.createFeatureMap(features: json)
             if (self.ready) {
+                Printer.printMessage("Flag updated")
                 SwiftEventBus.post("update")
             } else {
+                Printer.printMessage("Initial flags fetched")
                 SwiftEventBus.post("ready")
                 self.ready = true
             }
