@@ -72,7 +72,21 @@ public class UnleashClientBase {
         poller.start(context: context, completionHandler: completionHandler)
         metrics.start()
     }
-
+    
+    @available(iOS 13.0, *)
+    @MainActor
+    public func start(_ printToConsole: Bool = false) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            start(printToConsole) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
     public func stop() -> Void {
         poller.stop()
         metrics.stop()
