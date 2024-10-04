@@ -32,44 +32,43 @@ func generateTestToggleMapWithVariant() -> [String: Toggle] {
 }
 
 @available(iOS 13, *)
-func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClient {
+func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession(), printToConsole: Bool = false) -> UnleashClient {
     let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)
 
-    unleash.start()
+    unleash.start(printToConsole)
     return unleash
 }
 
 @available(iOS 13, *)
-func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) async throws -> UnleashClient {
+func setup(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession(), printToConsole: Bool = false) async throws -> UnleashClient {
     let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)
 
-    try await unleash.start()
+    try await unleash.start(printToConsole)
     return unleash
 }
 
-func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) -> UnleashClientBase {
+func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession(), printToConsole: Bool = false) -> UnleashClientBase {
     let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)
 
-    unleash.start()
+    unleash.start(printToConsole)
     return unleash
 }
 
-@available(iOS 13, *)
-func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession()) async throws -> UnleashClientBase {
+func setupBase(dataGenerator: @escaping () -> [String: Toggle], session: PollerSession = MockPollerSession(), printToConsole: Bool = false) async throws -> UnleashClientBase {
     let poller = MockPoller(callback: dataGenerator, unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!, apiKey: "SECRET", session: session)
     let metrics = MockMetrics(appName: "test")
 
     let unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy", clientKey: "dss22d", refreshInterval: 15, appName: "test", environment: "dev", poller: poller, metrics: metrics)
 
-    try await unleash.start()
+    unleash.start(printToConsole)
     return unleash
 }

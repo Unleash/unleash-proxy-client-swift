@@ -66,7 +66,11 @@
                 return generateTestToggleMapWithVariant()
             }
             
-            let unleash = setup(dataGenerator: dataGenerator)
+            let stubPrintToConsoleAtStart = true
+            let unleash = setup(
+                dataGenerator: dataGenerator,
+                printToConsole: stubPrintToConsoleAtStart
+            )
             
             var context: [String: String] = [:]
             context["userId"] = "uuid-123-test"
@@ -76,6 +80,7 @@
             let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
             
             XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid-123-test") && url.contains("environment=dev"))
+            XCTAssertEqual(Printer.showPrintStatements, stubPrintToConsoleAtStart)
         }
         
         @MainActor
