@@ -72,21 +72,7 @@ public class UnleashClientBase {
         poller.start(context: context, completionHandler: completionHandler)
         metrics.start()
     }
-    
-    @available(iOS 13.0, *)
-    @MainActor
-    public func start(_ printToConsole: Bool = false) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            start(printToConsole) { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
-    }
-    
+
     public func stop() -> Void {
         poller.stop()
         metrics.stop()
@@ -119,20 +105,6 @@ public class UnleashClientBase {
         self.context = self.calculateContext(context: context, properties: properties)
         self.start(completionHandler: completionHandler)
     }
-    
-    @available(iOS 13.0, *)
-    @MainActor
-    public func updateContext(context: [String: String], properties: [String:String]? = nil) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            updateContext(context: context, properties: properties) { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
-    }
 
     func calculateContext(context: [String: String], properties: [String:String]? = nil) -> Context {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
@@ -163,4 +135,29 @@ public class UnleashClientBase {
 
 @available(iOS 13, tvOS 13, *)
 public class UnleashClient: UnleashClientBase, ObservableObject {
+    @MainActor
+    public func start(_ printToConsole: Bool = false) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            start(printToConsole) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    public func updateContext(context: [String: String], properties: [String:String]? = nil) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            updateContext(context: context, properties: properties) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
 }
