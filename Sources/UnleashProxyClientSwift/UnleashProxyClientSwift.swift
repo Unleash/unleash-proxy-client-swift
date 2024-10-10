@@ -103,7 +103,7 @@ public class UnleashClientBase {
     
     public func updateContext(context: [String: String], properties: [String:String]? = nil, completionHandler: ((PollerError?) -> Void)? = nil) {
         self.context = self.calculateContext(context: context, properties: properties)
-        self.start(completionHandler: completionHandler)
+        self.start(Printer.showPrintStatements, completionHandler: completionHandler)
     }
 
     func calculateContext(context: [String: String], properties: [String:String]? = nil) -> Context {
