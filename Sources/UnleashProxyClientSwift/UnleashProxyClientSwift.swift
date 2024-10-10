@@ -135,4 +135,29 @@ public class UnleashClientBase {
 
 @available(iOS 13, tvOS 13, *)
 public class UnleashClient: UnleashClientBase, ObservableObject {
+    @MainActor
+    public func start(_ printToConsole: Bool = false) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            start(printToConsole) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    public func updateContext(context: [String: String], properties: [String:String]? = nil) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            updateContext(context: context, properties: properties) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
 }

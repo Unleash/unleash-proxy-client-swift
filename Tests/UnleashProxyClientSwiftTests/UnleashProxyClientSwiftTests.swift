@@ -46,6 +46,21 @@
             XCTAssert(unleash.poller.timer != nil)
         }
         
+        @MainActor
+        func testTimerWithAsyncStart() async throws {
+            func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
+                return generateTestToggleMapWithVariant()
+            }
+            
+            let mockedPoller = MockPollerSession()
+            let unleash = try await setup(
+                dataGenerator: dataGenerator,
+                session: mockedPoller
+            )
+            
+            XCTAssert(unleash.poller.timer != nil)
+        }
+        
         func testUpdateContext() {
             func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
                 return generateTestToggleMapWithVariant()
@@ -57,6 +72,24 @@
             context["userId"] = "uuid-123-test"
             context["sessionId"] = "uuid-234-test"
             unleash.updateContext(context: context)
+            
+            let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
+            
+            XCTAssert(url.contains("appName=test") && url.contains("sessionId=uuid-234-test") && url.contains("userId=uuid-123-test") && url.contains("environment=dev"))
+        }
+        
+        @MainActor
+        func testUpdateContextAsync() async throws {
+            func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
+                return generateTestToggleMapWithVariant()
+            }
+            
+            let unleash = try await setup(dataGenerator: dataGenerator)
+            
+            var context: [String: String] = [:]
+            context["userId"] = "uuid-123-test"
+            context["sessionId"] = "uuid-234-test"
+            try await unleash.updateContext(context: context)
             
             let url = unleash.poller.formatURL(context: unleash.context)!.absoluteString
             

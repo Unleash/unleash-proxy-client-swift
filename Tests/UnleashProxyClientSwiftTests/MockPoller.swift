@@ -49,6 +49,7 @@ public class MockDictionaryStorageProvider: StorageProvider {
 
 class MockPoller: Poller {
     var dataGenerator: () -> [String: Toggle];
+    var stubCompletionError: PollerError?
     
     init(callback: @escaping () -> [String: Toggle], unleashUrl: URL, apiKey: String, session: PollerSession) {
         self.dataGenerator = callback
@@ -57,5 +58,6 @@ class MockPoller: Poller {
     
     override func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
         self.storageProvider = MockDictionaryStorageProvider(storage: dataGenerator())
+        completionHandler?(stubCompletionError)
     }
 }
