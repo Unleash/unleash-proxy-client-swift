@@ -7,6 +7,83 @@ final class PollerTests: XCTestCase {
     private let apiKey = "SECRET"
     private let timeout = 1.0
 
+    func testWhenInitWithBootstrapTogglesThenAddToStore() {
+        let stubToggles = [
+            Toggle(name: "Foo", enabled: false),
+            Toggle(
+                name: "Bar",
+                enabled: true,
+                variant: .init(
+                    name: "Baz",
+                    enabled: false,
+                    featureEnabled: true,
+                    payload: .init(type: "string", value: "FooBarBaz")
+                )
+            )
+        ]
+        
+        let poller = createPoller(
+            with: MockPollerSession(),
+            bootstrap: .toggles(stubToggles)
+        )
+        
+        let foo = poller.getFeature(name: "Foo")
+        let bar = poller.getFeature(name: "Bar")
+        
+        XCTAssertEqual(foo, stubToggles.first!)
+        XCTAssertEqual(bar, stubToggles.last!)
+    }
+    
+    func testWhenInitWithBootstrapFileThenAddToStore() {
+        let poller = createPoller(
+            with: MockPollerSession(),
+            bootstrap: .jsonFile(
+                path: Bundle.module.path(
+                    forResource: "FeatureResponseStub", ofType: "json"
+                ) ?? ""
+            )
+        )
+
+        XCTAssertEqual(
+            poller.getFeature(name: "no-variant"),
+            Toggle(name: "no-variant", enabled: true)
+        )
+        
+        XCTAssertEqual(
+            poller.getFeature(
+                name: "disabled-with-variant-disabled-no-payload"
+            ),
+            Toggle(
+                name: "disabled-with-variant-disabled-no-payload",
+                enabled: false,
+                variant: .init(
+                    name: "foo",
+                    enabled: false,
+                    featureEnabled: false
+                )
+            )
+        )
+        
+        XCTAssertEqual(
+            poller.getFeature(
+                name: "enabled-with-variant-enabled-and-payload"
+            ),
+            Toggle(
+                name: "enabled-with-variant-enabled-and-payload",
+                enabled: true,
+                variant: .init(
+                    name: "bar",
+                    enabled: true,
+                    featureEnabled: true,
+                    payload: .init(
+                        type: "string",
+                        value: "baz"
+                    )
+                )
+            )
+        )
+    }
+    
     func testTitleCaseEtagResponseHeader() {
         let response = mockResponse(headerFields: ["Etag": "W/\"77f-WboeNIYTrCbEJ+TK78VuhInQn2M\""])
         let data = stubData()
@@ -126,9 +203,45 @@ final class PollerTests: XCTestCase {
         poller.getFeatures(context: Context())
         wait(for: [expectation], timeout: timeout)
     }
+    
+    func testGivenBoostrappingTogglesWhenStartThenSetToggles() {
+        let stubToggles = [
+            Toggle(name: "Foo", enabled: false),
+            Toggle(
+                name: "Bar",
+                enabled: true,
+                variant: .init(
+                    name: "Baz",
+                    enabled: false,
+                    featureEnabled: true,
+                    payload: .init(type: "string", value: "FooBarBaz")
+                )
+            )
+        ]
+        
+        let poller = createPoller(with: MockPollerSession())
+        
+        XCTAssertNil(poller.getFeature(name: "Foo"))
+        XCTAssertNil(poller.getFeature(name: "Bar"))
+        
+        poller.start(bootstrapping: stubToggles, context: Context())
+        
+        XCTAssertEqual(poller.getFeature(name: "Foo"), stubToggles.first!)
+        XCTAssertEqual(poller.getFeature(name: "Bar"), stubToggles.last!)
+    }
 
-    private func createPoller(with session: PollerSession, url: URL? = nil) -> Poller {
-        return Poller(refreshInterval: nil, unleashUrl: url ?? unleashUrl, apiKey: apiKey, session: session)
+    private func createPoller(
+        with session: PollerSession,
+        url: URL? = nil,
+        bootstrap: Bootstrap = .toggles([])
+    ) -> Poller {
+        Poller(
+            refreshInterval: nil,
+            unleashUrl: url ?? unleashUrl,
+            apiKey: apiKey,
+            session: session,
+            bootstrap: bootstrap
+        )
     }
 
     private func mockResponse(statusCode: Int = 200, headerFields: [String : String]? = nil) -> URLResponse {

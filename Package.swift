@@ -25,9 +25,15 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "UnleashProxyClientSwift",
-            dependencies: ["SwiftEventBus"]),
+            dependencies: ["SwiftEventBus"]
+        ),
         .testTarget(
-                   name: "UnleashProxyClientSwiftTests",
-                   dependencies: ["UnleashProxyClientSwift"]),
+            name: "UnleashProxyClientSwiftTests",
+            dependencies: ["UnleashProxyClientSwift"],
+            resources: [
+                .copy("FeatureResponseStub.json")
+            ]
+        ),
+        
     ]
 )
