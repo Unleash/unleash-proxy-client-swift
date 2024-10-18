@@ -1,6 +1,7 @@
 import XCTest
 @testable import UnleashProxyClientSwift
 
+// MARK: UnleashProxyClient tests
 @available(iOS 13, *)
 final class unleash_proxy_client_swiftTests: XCTestCase {
     func testIsEnabled() {
@@ -61,6 +62,21 @@ final class unleash_proxy_client_swiftTests: XCTestCase {
         XCTAssert(unleash.poller.timer != nil)
     }
     
+    @MainActor
+    func testGivenBootstrapWhenAsyncStartThenPassedToPoller() async throws {
+        let stubToggle = Toggle(name: "Foo", enabled: false)
+        
+        let unleash = try await setup(dataGenerator: { [:] })
+        
+        XCTAssertNil(unleash.poller.getFeature(name: stubToggle.name))
+        
+        try await unleash.start(bootstrap: .toggles([stubToggle]))
+        XCTAssertEqual(
+            unleash.poller.getFeature(name: "Foo"),
+            Toggle(name: "Foo", enabled: false)
+        )
+    }
+    
     func testUpdateContext() {
         func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
             return generateTestToggleMapWithVariant()
@@ -102,7 +118,35 @@ final class unleash_proxy_client_swiftTests: XCTestCase {
     }
 }
 
+// MARK: UnleashProxyClientBase tests
 final class unleash_proxy_client_base_swiftTests: XCTestCase {
+    func testInitWithBootstrapAndNoPollerInitialisesPollerWithBootstrap() {
+        let unleash = UnleashClientBase(
+            unleashUrl: "https://app.unleash-hosted.com/hosted/api/proxy",
+            clientKey: "SECRET",
+            bootstrap: .toggles([Toggle(name: "Foo", enabled: false)])
+        )
+        
+        XCTAssertEqual(
+            unleash.poller.getFeature(name: "Foo"),
+            Toggle(name: "Foo", enabled: false)
+        )
+    }
+    
+    func testGivenBootstrapWhenStartThenPassedToPoller() {
+        let stubToggle = Toggle(name: "Foo", enabled: false)
+        
+        let unleash = setupBase(dataGenerator: { [:] })
+        
+        XCTAssertNil(unleash.poller.getFeature(name: stubToggle.name))
+        
+        unleash.start(bootstrap: .toggles([stubToggle]))
+        XCTAssertEqual(
+            unleash.poller.getFeature(name: "Foo"),
+            Toggle(name: "Foo", enabled: false)
+        )
+    }
+    
     func testIsEnabled() {
         func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
             generateBasicTestToggleMap()
