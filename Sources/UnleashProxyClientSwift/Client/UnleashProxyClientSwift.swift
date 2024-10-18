@@ -19,7 +19,8 @@ public class UnleashClientBase {
         context: [String: String]? = nil,
         poller: Poller? = nil,
         metrics: Metrics? = nil,
-        customHeaders: [String: String] = [:]
+        customHeaders: [String: String] = [:],
+        bootstrap: Bootstrap = .toggles([])
     ) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
@@ -29,7 +30,13 @@ public class UnleashClientBase {
         if let poller = poller {
             self.poller = poller
         } else {
-            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey, customHeaders: customHeaders)
+            self.poller = Poller(
+                refreshInterval: refreshInterval,
+                unleashUrl: url,
+                apiKey: clientKey,
+                customHeaders: customHeaders,
+                bootstrap: bootstrap
+            )
         }
         if let metrics = metrics {
             self.metrics = metrics

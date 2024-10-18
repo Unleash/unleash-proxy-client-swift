@@ -63,7 +63,8 @@ public class Poller {
         apiKey: String,
         session: PollerSession = URLSession.shared,
         storageProvider: StorageProvider = DictionaryStorageProvider(),
-        customHeaders: [String: String] = [:]
+        customHeaders: [String: String] = [:],
+        bootstrap: Bootstrap = .toggles([])
     ) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
@@ -74,6 +75,11 @@ public class Poller {
         self.session = session
         self.storageProvider = storageProvider
         self.customHeaders = customHeaders
+        
+        let toggles = bootstrap.toggles
+        if toggles.isEmpty == false {
+            createFeatureMap(toggles: toggles)
+        }
     }
 
     public func start(
