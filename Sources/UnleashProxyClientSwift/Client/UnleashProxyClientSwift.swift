@@ -67,6 +67,21 @@ public class UnleashClientBase {
         )
         metrics.start()
     }
+    
+    public func start(
+        bootstrapFile: String,
+        _ printToConsole: Bool = false,
+        completionHandler: ((PollerError?) -> Void)? = nil
+    ) throws -> Void {
+        let toggleResponse: FeatureResponse = try bootstrapFile
+            .objectFromJSON()
+        
+        start(
+            bootstrapping: toggleResponse.toggles,
+            printToConsole,
+            completionHandler: completionHandler
+        )
+    }
 
     public func stop() -> Void {
         poller.stop()
@@ -153,6 +168,26 @@ public class UnleashClient: UnleashClientBase, ObservableObject {
                 } else {
                     continuation.resume()
                 }
+            }
+        }
+    }
+    
+    @MainActor
+    public func start(
+        bootstrapFile: String,
+        printToConsole: Bool = false
+    ) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            do {
+                try start(bootstrapFile: bootstrapFile, printToConsole) { error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+            } catch {
+                continuation.resume(throwing: error)
             }
         }
     }

@@ -2,6 +2,3 @@
 struct FeatureResponse: Codable {
     let toggles: [Toggle]
 }
-
-
-
