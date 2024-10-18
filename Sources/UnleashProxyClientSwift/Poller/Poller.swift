@@ -2,49 +2,6 @@
 import Foundation
 import SwiftEventBus
 
-public protocol PollerSession {
-    func perform(_ request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void)
-}
-
-public enum PollerError: Error {
-    case decoding
-    case network
-    case url
-    case noResponse
-    case unhandledStatusCode
-}
-
-public protocol StorageProvider {
-    func set(value: Toggle?, key: String)
-    func value(key: String) -> Toggle?
-    func clear()
-}
-
-public class DictionaryStorageProvider: StorageProvider {
-    private var storage: [String: Toggle] = [:]
-    private let queue = DispatchQueue(label: "com.unleash.storageprovider")
-
-    public init() {}
-
-    public func set(value: Toggle?, key: String) {
-        queue.async {
-            self.storage[key] = value
-        }
-    }
-
-    public func value(key: String) -> Toggle? {
-        queue.sync {
-            return self.storage[key]
-        }
-    }
-    
-    public func clear() {
-        queue.sync {
-            self.storage = [:]
-        }
-    }
-}
-
 public class Poller {
     var refreshInterval: Int?
     var unleashUrl: URL
@@ -87,11 +44,13 @@ public class Poller {
         context: Context,
         completionHandler: ((PollerError?) -> Void)? = nil
     ) -> Void {
-        if toggles.isEmpty == false {
+        if toggles.isEmpty {
+            self.getFeatures(context: context, completionHandler: completionHandler)
+        } else {
             Printer.printMessage("Starting with provided bootstrap toggles")
             createFeatureMap(toggles: toggles)
+            completionHandler?(nil)
         }
-        
 
         let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
             self.getFeatures(context: context)
