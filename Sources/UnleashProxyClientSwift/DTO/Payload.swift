@@ -1,5 +1,5 @@
 // MARK: - Payload
-public struct Payload: Codable {
+public struct Payload: Codable, Equatable {
     public let type, value: String
     
     public init(type: String, value: String) {

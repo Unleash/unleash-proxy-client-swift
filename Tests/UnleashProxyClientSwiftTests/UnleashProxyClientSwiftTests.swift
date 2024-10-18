@@ -49,7 +49,7 @@ final class unleash_proxy_client_swiftTests: XCTestCase {
     @MainActor
     func testTimerWithAsyncStart() async throws {
         func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
-            return generateTestToggleMapWithVariant()
+            generateTestToggleMapWithVariant()
         }
         
         let mockedPoller = MockPollerSession()
@@ -105,7 +105,7 @@ final class unleash_proxy_client_swiftTests: XCTestCase {
 final class unleash_proxy_client_base_swiftTests: XCTestCase {
     func testIsEnabled() {
         func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
-            return generateBasicTestToggleMap()
+            generateBasicTestToggleMap()
         }
         
         let unleash = setupBase(dataGenerator: dataGenerator)
@@ -113,8 +113,12 @@ final class unleash_proxy_client_base_swiftTests: XCTestCase {
         XCTAssert(unleash.isEnabled(name: "Test") == true)
         XCTAssert(unleash.isEnabled(name: "TestTwo") == false)
         XCTAssert(unleash.isEnabled(name: "DoesNotExist") == false)
-        let expectedToggleMetrics = ["TestTwo": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]), "DoesNotExist": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]), "Test": UnleashProxyClientSwift.ToggleMetrics(yes: 1, no: 0, variants: [:])];
-        XCTAssertEqual(unleash.metrics.bucket.toggles, expectedToggleMetrics);
+        let expectedToggleMetrics = [
+            "TestTwo": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]),
+            "DoesNotExist": UnleashProxyClientSwift.ToggleMetrics(yes: 0, no: 1, variants: [:]),
+            "Test": UnleashProxyClientSwift.ToggleMetrics(yes: 1, no: 0, variants: [:])
+        ]
+        XCTAssertEqual(unleash.metrics.bucket.toggles, expectedToggleMetrics)
     }
     
     func testGetVariant() {

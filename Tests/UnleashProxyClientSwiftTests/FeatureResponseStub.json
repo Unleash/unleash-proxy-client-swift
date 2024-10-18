@@ -1,0 +1,30 @@
+{
+  "toggles": [
+      {
+        "name": "no-variant",
+        "enabled": true
+      },
+      {
+        "name": "disabled-with-variant-disabled-no-payload",
+        "enabled": false,
+        "variant": {
+            "name": "foo",
+            "enabled": false,
+            "feature_enabled": false
+        }
+      },
+      {
+        "name": "enabled-with-variant-enabled-and-payload",
+        "enabled": true,
+        "variant": {
+            "name": "bar",
+            "enabled": true,
+            "feature_enabled": true,
+            "payload": {
+                "type": "string",
+                "value": "baz"
+            }
+        }
+      }
+  ]
+}

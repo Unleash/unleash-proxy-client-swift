@@ -1,5 +1,5 @@
 // MARK: - Toggle
-public struct Toggle: Codable {
+public struct Toggle: Codable, Equatable {
     public let name: String
     public let enabled: Bool
     public let variant: Variant?

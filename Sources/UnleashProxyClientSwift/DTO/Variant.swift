@@ -1,5 +1,5 @@
 // MARK: - Variant
-public struct Variant: Codable {
+public struct Variant: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case name, enabled, payload
         case featureEnabled = "feature_enabled"
@@ -21,7 +21,7 @@ public struct Variant: Codable {
     public init(
         name: String,
         enabled: Bool,
-        featureEnabled: Bool?,
+        featureEnabled: Bool? = nil,
         payload: Payload? = nil
     ) {
         self.name = name
