@@ -1,42 +1,6 @@
 import Foundation
 import SwiftEventBus
 
-// MARK: - Welcome
-struct FeatureResponse: Codable {
-    let toggles: [Toggle]
-}
-
-// MARK: - Toggle
-public struct Toggle: Codable {
-    public let name: String
-    public let enabled: Bool
-    public let variant: Variant?
-}
-
-// MARK: - Variant
-public struct Variant: Codable {
-    public let name: String
-    public let enabled: Bool
-    public let payload: Payload?
-}
-
-// MARK: - Payload
-public struct Payload: Codable {
-    public let type, value: String
-}
-
-public enum UnleashEvent: String, CaseIterable {
-    /// Emitted when UnleashClient is ready after finished first flag fetch
-    case ready
-    /// Emitted when toggles have been updated
-    case update
-    /// Emitted on metrics sent
-    case sent
-    /// Emitted when metrics failed to send
-    case error
-}
-
-
 @available(macOS 10.15, *)
 public class UnleashClientBase {
     public var context: Context
@@ -96,7 +60,10 @@ public class UnleashClientBase {
     }
 
     public func getVariant(name: String) -> Variant {
-        let variant = poller.getFeature(name: name)?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
+        let variant = poller
+            .getFeature(name: name)?
+            .variant ?? .defaultDisabled
+        
         metrics.count(name: name, enabled: variant.enabled)
         metrics.countVariant(name: name, variant: variant.name)
         return variant
