@@ -82,7 +82,7 @@ public class Poller {
         completionHandler: ((PollerError?) -> Void)? = nil
     ) -> Void {
         if toggles.isEmpty == false {
-            Printer.printMessage("Using provided boostrap toggles")
+            Printer.printMessage("Starting with provided bootstrap toggles")
             createFeatureMap(toggles: toggles)
         }
         

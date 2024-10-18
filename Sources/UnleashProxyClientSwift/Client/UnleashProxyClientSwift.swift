@@ -54,33 +54,18 @@ public class UnleashClientBase {
     }
 
     public func start(
-        bootstrapping toggles: [Toggle] = [],
+        bootstrap: Bootstrap = .toggles([]),
         _ printToConsole: Bool = false,
         completionHandler: ((PollerError?) -> Void)? = nil
     ) -> Void {
         Printer.showPrintStatements = printToConsole
         self.stop()
         poller.start(
-            bootstrapping: toggles,
+            bootstrapping: bootstrap.toggles,
             context: context,
             completionHandler: completionHandler
         )
         metrics.start()
-    }
-    
-    public func start(
-        bootstrapFile: String,
-        _ printToConsole: Bool = false,
-        completionHandler: ((PollerError?) -> Void)? = nil
-    ) throws -> Void {
-        let toggleResponse: FeatureResponse = try bootstrapFile
-            .objectFromJSON()
-        
-        start(
-            bootstrapping: toggleResponse.toggles,
-            printToConsole,
-            completionHandler: completionHandler
-        )
     }
 
     public func stop() -> Void {
@@ -158,11 +143,11 @@ public class UnleashClientBase {
 public class UnleashClient: UnleashClientBase, ObservableObject {
     @MainActor
     public func start(
-        bootstrapping toggles: [Toggle] = [],
+        bootstrap: Bootstrap = .toggles([]),
         printToConsole: Bool = false
     ) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            start(bootstrapping: toggles, printToConsole) { error in
+            start(bootstrap: bootstrap, printToConsole) { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
@@ -173,27 +158,10 @@ public class UnleashClient: UnleashClientBase, ObservableObject {
     }
     
     @MainActor
-    public func start(
-        bootstrapFile: String,
-        printToConsole: Bool = false
+    public func updateContext(
+        context: [String: String],
+        properties: [String:String]? = nil
     ) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            do {
-                try start(bootstrapFile: bootstrapFile, printToConsole) { error in
-                    if let error {
-                        continuation.resume(throwing: error)
-                    } else {
-                        continuation.resume()
-                    }
-                }
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
-    }
-    
-    @MainActor
-    public func updateContext(context: [String: String], properties: [String:String]? = nil) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             updateContext(context: context, properties: properties) { error in
                 if let error {
