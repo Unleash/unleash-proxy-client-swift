@@ -1,66 +1,6 @@
 import Foundation
 import SwiftEventBus
 
-extension Date {
-    func iso8601String() -> String {
-        let formatter = ISO8601DateFormatter()
-        return formatter.string(from: self)
-    }
-}
-
-struct ToggleMetrics: Equatable {
-    var yes: Int = 0
-    var no: Int = 0
-    var variants: [String: Int] = [:]
-
-    func toJson() -> [String: Any] {
-        ["yes": yes, "no": no, "variants": variants]
-    }
-}
-
-struct Bucket {
-    private let clock: () -> Date
-    var start: Date
-    var stop: Date?
-    var toggles: [String: ToggleMetrics] = [:]
-
-    init(clock: @escaping () -> Date) {
-        self.clock = clock
-        start = clock()
-    }
-
-    mutating func closeBucket() {
-        stop = clock()
-    }
-
-    func isEmpty() -> Bool {
-        toggles.isEmpty
-    }
-
-    func toJson() -> [String: Any] {
-        let mappedToggles = toggles.mapValues { $0.toJson() }
-        return [
-            "start": start.iso8601String(),
-            "stop": stop?.iso8601String() ?? "",
-            "toggles": mappedToggles
-        ]
-    }
-}
-
-struct MetricsPayload {
-    let appName: String
-    let instanceId: String
-    let bucket: Bucket
-
-    func toJson() -> [String: Any] {
-        [
-            "appName": appName,
-            "instanceId": instanceId,
-            "bucket": bucket.toJson()
-        ]
-    }
-}
-
 public class Metrics {
     let appName: String
     let metricsInterval: TimeInterval
