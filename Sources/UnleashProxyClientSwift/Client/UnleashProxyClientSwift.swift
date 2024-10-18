@@ -8,7 +8,19 @@ public class UnleashClientBase {
     var poller: Poller
     var metrics: Metrics
 
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = "default", context: [String: String]? = nil, poller: Poller? = nil, metrics: Metrics? = nil, customHeaders: [String: String] = [:]) {
+    public init(
+        unleashUrl: String,
+        clientKey: String,
+        refreshInterval: Int = 15,
+        metricsInterval: Int = 30,
+        disableMetrics: Bool = false,
+        appName: String = "unleash-swift-client",
+        environment: String? = "default",
+        context: [String: String]? = nil,
+        poller: Poller? = nil,
+        metrics: Metrics? = nil,
+        customHeaders: [String: String] = [:]
+    ) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
@@ -41,10 +53,18 @@ public class UnleashClientBase {
         }
     }
 
-    public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+    public func start(
+        bootstrapping toggles: [Toggle] = [],
+        _ printToConsole: Bool = false,
+        completionHandler: ((PollerError?) -> Void)? = nil
+    ) -> Void {
         Printer.showPrintStatements = printToConsole
         self.stop()
-        poller.start(context: context, completionHandler: completionHandler)
+        poller.start(
+            bootstrapping: toggles,
+            context: context,
+            completionHandler: completionHandler
+        )
         metrics.start()
     }
 
@@ -122,9 +142,12 @@ public class UnleashClientBase {
 @available(iOS 13, tvOS 13, *)
 public class UnleashClient: UnleashClientBase, ObservableObject {
     @MainActor
-    public func start(_ printToConsole: Bool = false) async throws {
+    public func start(
+        bootstrapping toggles: [Toggle] = [],
+        printToConsole: Bool = false
+    ) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            start(printToConsole) { error in
+            start(bootstrapping: toggles, printToConsole) { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

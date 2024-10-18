@@ -14,9 +14,21 @@ public struct Variant: Codable {
     /// Enabled state of host feature which informs if variant is disabled from host feature state
     ///     - false: Host feature is disabled
     ///     - true: Host feature is enabled
-    public let featureEnabled: Bool
+    public let featureEnabled: Bool?
     /// Optional payload delivered with the variant
     public let payload: Payload?
+    
+    public init(
+        name: String,
+        enabled: Bool,
+        featureEnabled: Bool?,
+        payload: Payload? = nil
+    ) {
+        self.name = name
+        self.enabled = enabled
+        self.featureEnabled = featureEnabled
+        self.payload = payload
+    }
 }
 
 extension Variant {
