@@ -32,7 +32,13 @@ import UnleashProxyClientSwift
 
 // Setup Unleash in the context where it makes most sense
 
-var unleash = UnleashProxyClientSwift.UnleashClient(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test", context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"])
+var unleash = UnleashProxyClientSwift.UnleashClient(
+    unleashUrl: "https://<unleash-instance>/api/frontend",
+    clientKey: "<client-side-api-token>", 
+    refreshInterval: 15, 
+    appName: "test", 
+    context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"]
+)
 
 unleash.start()
 ```
@@ -45,7 +51,13 @@ import UnleashProxyClientSwift
 
 // Setup Unleash in the context where it makes most sense
 
-var unleash = UnleashProxyClientSwift.UnleashClientBase(unleashUrl: "https://<unleash-instance>/api/frontend", clientKey: "<client-side-api-token>", refreshInterval: 15, appName: "test", context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"])
+var unleash = UnleashProxyClientSwift.UnleashClientBase(
+    unleashUrl: "https://<unleash-instance>/api/frontend", 
+    clientKey: "<client-side-api-token>", 
+    refreshInterval: 15, 
+    appName: "test", 
+    context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"]
+)
 
 unleash.start()
 ```
@@ -96,8 +108,106 @@ The Unleash SDK takes the following options:
 | refreshInterval   | no | 15                        | How often, in seconds, the SDK should check for updated toggle configuration. If set to 0 will disable checking for updates                 |
 | metricsInterval   | no | 30                        | How often, in seconds, the SDK should send usage metrics back to Unleash Edge/Proxy                                                              | 
 | disableMetrics    | no | false                     | Set this option to `true` if you want to disable usage metrics
-| context    | no | [:]                     | The initial context parameters except from `appName` and `environment which are specified as top level fields
+| context           | no | [:]                     | The initial context parameters except from `appName` and `environment which are specified as top level fields
 | customHeaders     | no| `[:]`                      | Additional headers to use when making HTTP requests to the Unleash Edge/Proxy. In case of name collisions with the default headers, the `customHeaders` value will be used. |
+| bootstrap          | no | empty list of toggles     | The Unleash Edge/Proxy SDK can be initialised with an initial set of toggles, read from either a list of Toggles, or a jsonFile matching the structure of the response from the frontend API. These will be available instantly before the initial fetch.
+
+### Bootstrapping
+You can provide the initial toggle state to the Unleash client SDK. This is useful when you have a known initial state for your feature toggles. This toggle state can be bootstrapped to the client via a list of toggles, or from a file matching a response from the [frontend API](https://docs.getunleash.io/reference/front-end-api). For example:
+
+#### Bootstrap from hard-coded list
+```swift
+// Note variant and payload can be optional.
+let bootstrapList = Bootstrap
+    .toggles(
+        [
+            Toggle(name: "Foo", enabled: true),
+            Toggle(
+                name: "Bar", 
+                enabled: false, 
+                variant: Variant(
+                    name: "bar",
+                    enabled: true,
+                    featureEnabled: true,
+                    payload: Payload(type: "string", value: "baz")
+                )
+            )
+        ]
+    )
+```
+
+#### Bootstrap from file matching frontend API response
+```json    
+{
+  "toggles": [
+      {
+        "name": "no-variant",
+        "enabled": true
+      },
+      {
+        "name": "disabled-with-variant-disabled-no-payload",
+        "enabled": false,
+        "variant": {
+            "name": "foo",
+            "enabled": false,
+            "feature_enabled": false
+        }
+      },
+      {
+        "name": "enabled-with-variant-enabled-and-payload",
+        "enabled": true,
+        "variant": {
+            "name": "bar",
+            "enabled": true,
+            "feature_enabled": true,
+            "payload": {
+                "type": "string",
+                "value": "baz"
+            }
+        }
+      }
+  ]
+}
+```
+
+```swift
+guard let filePath = Bundle.main.path(forResource: "FeatureResponseFile", ofType: "json") else {
+    // Handle missing file
+}
+
+let boostrapFile = Bootsrap.jsonFile(path: filePath)
+```
+
+#### Using the bootstrap list of toggles
+Whether from a hard-coded list, or a json file, the boostrap toggles can be injected into the Unleash Edge/proxy client either at initialisation time, or when calling start. For example:
+
+```swift
+import SwiftUI
+import UnleashProxyClientSwift
+
+// Setup Unleash in the context where it makes most sense
+
+let unleash = UnleashClient(
+    unleashUrl: "https://<unleash-instance>/api/frontend", 
+    clientKey: "<client-side-api-token>",
+    bootstrap: .toggles([Toggle(name: "Foo", enabled: true)])
+)
+
+// Toggles can be accessed now ahead of starting client
+let isFooEnabled = unleash.isEnabled(name: "Foo") // true
+
+// Or provide when starting in case of slow/faulty connection
+unleash.start(bootstrap: .jsonFile("path/to/json/file"))
+
+// Or using async-await concurrency (>= iOS13)
+await unleash.start(bootstrap: .jsonFile("path/to/json/file"))
+```
+
+#### Important notices
+- If you initialise the Unleash Edge/proxy client with a Poller, you should inject the bootstrap directly into the poller. **Any bootstrapped toggles inject into the Unleash client will be ignored when a poller is also injected.**
+- Any bootstrapped toggles will be removed after the first initial fetch
+- If bootstrap toggles are provided when calling start, the first fetch will be at the next refresh interval specified (default 15 seconds)
+- Calling `updateContext(...)` before the first fetch will remove bootstrapped toggles.
 
 ### Update context
 

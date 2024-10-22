@@ -1,42 +1,6 @@
 import Foundation
 import SwiftEventBus
 
-// MARK: - Welcome
-struct FeatureResponse: Codable {
-    let toggles: [Toggle]
-}
-
-// MARK: - Toggle
-public struct Toggle: Codable {
-    public let name: String
-    public let enabled: Bool
-    public let variant: Variant?
-}
-
-// MARK: - Variant
-public struct Variant: Codable {
-    public let name: String
-    public let enabled: Bool
-    public let payload: Payload?
-}
-
-// MARK: - Payload
-public struct Payload: Codable {
-    public let type, value: String
-}
-
-public enum UnleashEvent: String, CaseIterable {
-    /// Emitted when UnleashClient is ready after finished first flag fetch
-    case ready
-    /// Emitted when toggles have been updated
-    case update
-    /// Emitted on metrics sent
-    case sent
-    /// Emitted when metrics failed to send
-    case error
-}
-
-
 @available(macOS 10.15, *)
 public class UnleashClientBase {
     public var context: Context
@@ -44,7 +8,20 @@ public class UnleashClientBase {
     var poller: Poller
     var metrics: Metrics
 
-    public init(unleashUrl: String, clientKey: String, refreshInterval: Int = 15, metricsInterval: Int = 30, disableMetrics: Bool = false, appName: String = "unleash-swift-client", environment: String? = "default", context: [String: String]? = nil, poller: Poller? = nil, metrics: Metrics? = nil, customHeaders: [String: String] = [:]) {
+    public init(
+        unleashUrl: String,
+        clientKey: String,
+        refreshInterval: Int = 15,
+        metricsInterval: Int = 30,
+        disableMetrics: Bool = false,
+        appName: String = "unleash-swift-client",
+        environment: String? = "default",
+        context: [String: String]? = nil,
+        poller: Poller? = nil,
+        metrics: Metrics? = nil,
+        customHeaders: [String: String] = [:],
+        bootstrap: Bootstrap = .toggles([])
+    ) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
@@ -53,7 +30,13 @@ public class UnleashClientBase {
         if let poller = poller {
             self.poller = poller
         } else {
-            self.poller = Poller(refreshInterval: refreshInterval, unleashUrl: url, apiKey: clientKey, customHeaders: customHeaders)
+            self.poller = Poller(
+                refreshInterval: refreshInterval,
+                unleashUrl: url,
+                apiKey: clientKey,
+                customHeaders: customHeaders,
+                bootstrap: bootstrap
+            )
         }
         if let metrics = metrics {
             self.metrics = metrics
@@ -77,10 +60,18 @@ public class UnleashClientBase {
         }
     }
 
-    public func start(_ printToConsole: Bool = false, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {
+    public func start(
+        bootstrap: Bootstrap = .toggles([]),
+        _ printToConsole: Bool = false,
+        completionHandler: ((PollerError?) -> Void)? = nil
+    ) -> Void {
         Printer.showPrintStatements = printToConsole
         self.stop()
-        poller.start(context: context, completionHandler: completionHandler)
+        poller.start(
+            bootstrapping: bootstrap.toggles,
+            context: context,
+            completionHandler: completionHandler
+        )
         metrics.start()
     }
 
@@ -96,7 +87,10 @@ public class UnleashClientBase {
     }
 
     public func getVariant(name: String) -> Variant {
-        let variant = poller.getFeature(name: name)?.variant ?? Variant(name: "disabled", enabled: false, payload: nil)
+        let variant = poller
+            .getFeature(name: name)?
+            .variant ?? .defaultDisabled
+        
         metrics.count(name: name, enabled: variant.enabled)
         metrics.countVariant(name: name, variant: variant.name)
         return variant
@@ -155,9 +149,12 @@ public class UnleashClientBase {
 @available(iOS 13, tvOS 13, *)
 public class UnleashClient: UnleashClientBase, ObservableObject {
     @MainActor
-    public func start(_ printToConsole: Bool = false) async throws {
+    public func start(
+        bootstrap: Bootstrap = .toggles([]),
+        printToConsole: Bool = false
+    ) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            start(printToConsole) { error in
+            start(bootstrap: bootstrap, printToConsole) { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
@@ -168,7 +165,10 @@ public class UnleashClient: UnleashClientBase, ObservableObject {
     }
     
     @MainActor
-    public func updateContext(context: [String: String], properties: [String:String]? = nil) async throws {
+    public func updateContext(
+        context: [String: String],
+        properties: [String:String]? = nil
+    ) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             updateContext(context: context, properties: properties) { error in
                 if let error {
