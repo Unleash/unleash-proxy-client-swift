@@ -97,8 +97,16 @@ public class UnleashClientBase {
     }
 
     public func subscribe(name: String, callback: @escaping () -> Void) {
-        SwiftEventBus.onBackgroundThread(self, name: name) { result in
-            callback()
+        if Thread.isMainThread {
+            print("Subscribing to \(name) on main thread")
+            SwiftEventBus.onMainThread(self, name: name) { result in
+                callback()
+            }
+        } else {
+            print("Subscribing to \(name) on background thread")
+            SwiftEventBus.onBackgroundThread(self, name: name) { result in
+                callback()
+            }
         }
     }
     
