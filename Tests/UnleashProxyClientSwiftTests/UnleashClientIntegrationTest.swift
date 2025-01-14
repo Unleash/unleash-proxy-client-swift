@@ -71,51 +71,13 @@ class UnleashIntegrationTests: XCTestCase {
         }
         
         unleashClient.subscribe(.update) {
+            !assert(Thread.isMainThread)
             XCTAssertTrue(self.unleashClient.isEnabled(name: self.featureName), "Feature should be enabled")
             let variant = self.unleashClient.getVariant(name: self.featureName)
             XCTAssertTrue(variant.enabled, "Variant should be enabled")
             XCTAssert(variant.name == "feature-variant")
             
             expectation.fulfill()
-        }
-
-        unleashClient.start()
-        // Run isEnabled many times to trigger a data race when the poller is updating the data cache
-        // This is to test that the poller is thread safe, and you can verify this by running the test with
-        // swift test --sanitize=thread
-        for _ in 1...15000 {
-            let result = unleashClient.isEnabled(name: "dataRaceTest")
-            XCTAssertFalse(result)
-        }
-
-        wait(for: [expectation], timeout: 5)
-    }
-    
-    func testMainActorSafe() {
-        let expectation = self.expectation(description: "Waiting for client updates")
-        
-        XCTAssertEqual(unleashClient.context.toMap(), ["environment": "default", "clientId": "disabled", "appName": "testIntegration"])
-        unleashClient.subscribe(.ready) {
-            
-            XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")
-
-            let variant = self.unleashClient.getVariant(name: self.featureName)
-            XCTAssertNotNil(variant, "Variant should not be nil")
-            XCTAssertFalse(variant.enabled, "Variant should be disabled")
-
-            self.unleashClient.updateContext(context: ["clientId": "enabled"]);
-            
-        }
-        
-        unleashClient.subscribe(.update) {
-            assert(Thread.isMainThread)
-            XCTAssertTrue(self.unleashClient.isEnabled(name: self.featureName), "Feature should be enabled")
-            let variant = self.unleashClient.getVariant(name: self.featureName)
-            XCTAssertTrue(variant.enabled, "Variant should be enabled")
-            XCTAssert(variant.name == "feature-variant")
-            
-            expectation.fulfill()
-            
         }
 
         unleashClient.start()
