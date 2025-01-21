@@ -51,9 +51,9 @@ class MockPoller: Poller {
     var dataGenerator: () -> [String: Toggle];
     var stubCompletionError: PollerError?
     
-    init(callback: @escaping () -> [String: Toggle], unleashUrl: URL, apiKey: String, session: PollerSession) {
+    init(callback: @escaping () -> [String: Toggle], unleashUrl: URL, apiKey: String, session: PollerSession, appName: String, connectionId: UUID) {
         self.dataGenerator = callback
-        super.init(refreshInterval: 15, unleashUrl: unleashUrl, apiKey: apiKey, session: session)
+        super.init(refreshInterval: 15, unleashUrl: unleashUrl, apiKey: apiKey, session: session, appName: appName, connectionId: connectionId)
     }
     
     override func getFeatures(context: Context, completionHandler: ((PollerError?) -> Void)? = nil) -> Void {

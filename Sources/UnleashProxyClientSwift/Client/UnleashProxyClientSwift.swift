@@ -7,6 +7,7 @@ public class UnleashClientBase {
     var timer: Timer?
     var poller: Poller
     var metrics: Metrics
+    var connectionId: UUID
 
     public init(
         unleashUrl: String,
@@ -26,6 +27,7 @@ public class UnleashClientBase {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
+        self.connectionId = UUID()
         self.timer = nil
         if let poller = poller {
             self.poller = poller
@@ -35,7 +37,9 @@ public class UnleashClientBase {
                 unleashUrl: url,
                 apiKey: clientKey,
                 customHeaders: customHeaders,
-                bootstrap: bootstrap
+                bootstrap: bootstrap,
+                appName: appName,
+                connectionId: connectionId
             )
         }
         if let metrics = metrics {
@@ -51,7 +55,7 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId)
         }
         
         self.context = Context(appName: appName, environment: environment)

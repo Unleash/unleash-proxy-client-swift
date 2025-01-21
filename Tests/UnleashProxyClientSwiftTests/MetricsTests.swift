@@ -26,7 +26,8 @@ final class MetricsTests: XCTestCase {
                 clock: fixedClock,
                 poster: poster,
                 url: URL(string: "https://unleashinstance.com")!,
-                clientKey: "testKey")
+                clientKey: "testKey",
+                connectionId: UUID())
         metrics.start()
 
         metrics.count(name: "testToggle", enabled: true)
@@ -84,7 +85,8 @@ final class MetricsTests: XCTestCase {
                 clock: fixedClock,
                 poster: poster,
                 url: URL(string: "https://unleashinstance.com")!,
-                clientKey: "testKey")
+                clientKey: "testKey",
+                connectionId: UUID())
         metrics.start()
 
         metrics.count(name: "irrelevant", enabled: true)
@@ -105,7 +107,8 @@ final class MetricsTests: XCTestCase {
                 disableMetrics: true,
                 poster: poster,
                 url: URL(string: "https://unleashinstance.com")!,
-                clientKey: "testKey")
+                clientKey: "testKey",
+                connectionId: UUID())
         metrics.start()
 
         metrics.count(name: "irrelevant", enabled: true)

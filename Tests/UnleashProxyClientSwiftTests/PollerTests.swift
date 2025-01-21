@@ -5,6 +5,8 @@ final class PollerTests: XCTestCase {
 
     private let unleashUrl = URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!
     private let apiKey = "SECRET"
+    private let appName = "APPNAME"
+    private let connectionId = UUID(uuidString: "123E4567-E89B-12d3-A456-426614174000")!
     private let timeout = 1.0
 
     func testWhenInitWithBootstrapTogglesThenAddToStore() {
@@ -190,13 +192,16 @@ final class PollerTests: XCTestCase {
         let response = mockResponse()
         let data = stubData()
         let session = MockPollerSession(data: data, response: response)
-        let poller = Poller(refreshInterval: nil, unleashUrl: unleashUrl, apiKey: apiKey, session: session, customHeaders: customHeaders)
+        let poller = Poller(refreshInterval: nil, unleashUrl: unleashUrl, apiKey: apiKey, session: session, customHeaders: customHeaders, appName: appName, connectionId: connectionId)
 
         let expectation = XCTestExpectation(description: "Expect custom headers to be set in the request.")
 
         session.performRequestHandler = { request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "X-Custom-Header"), "CustomValue")
             XCTAssertEqual(request.value(forHTTPHeaderField: "X-Another-Header"), "AnotherValue")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-unleash-appname"), "APPNAME")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-unleash-connection-id"), "123E4567-E89B-12D3-A456-426614174000")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-unleash-sdk"), "unleash-client-swift:development")
             expectation.fulfill()
         }
 
@@ -240,7 +245,9 @@ final class PollerTests: XCTestCase {
             unleashUrl: url ?? unleashUrl,
             apiKey: apiKey,
             session: session,
-            bootstrap: bootstrap
+            bootstrap: bootstrap,
+            appName: appName,
+            connectionId: connectionId
         )
     }
 

@@ -13,6 +13,6 @@ class MockMetrics: Metrics {
             let response = HTTPURLResponse(url: URL(string: "https://irrelevant.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
             completionHandler(.success((Data(), response!)))
         }
-        super.init(appName: appName, metricsInterval: Double(15), clock: { return Date() }, disableMetrics: false, poster: noOpPoster, url: URL(string: "https://irrelevant.com")!, clientKey: "irrelevant")
+        super.init(appName: appName, metricsInterval: Double(15), clock: { return Date() }, disableMetrics: false, poster: noOpPoster, url: URL(string: "https://irrelevant.com")!, clientKey: "irrelevant", connectionId: UUID())
     }
 }
