@@ -272,7 +272,7 @@ Note: To release the package you'll need to have [CocoaPods](https://cocoapods.o
 
 Update `Sources/Version/Version.swift` with the new version number. It will be used in `x-unleash-sdk` header as a version reported to Unleash server.
 
-Then, you'll need to add a tag with the same version number as previous step. Releasing the tag is enough for the Swift package manager, but it's polite to also ensure CocoaPods users can also consume the code.
+Then, you'll need to add a tag with the same version number as the previous step. Releasing the tag is enough for the Swift package manager, but it's polite to also ensure CocoaPods users can also consume the code.
 
 ```sh
 git tag -a 0.0.4 -m "v0.0.4"
