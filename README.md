@@ -270,7 +270,9 @@ The ready event is fired once the client has received it's first set of feature 
 
 Note: To release the package you'll need to have [CocoaPods](https://cocoapods.org/) installed.
 
-First, you'll need to add a tag. Releasing the tag is enough for the Swift package manager, but it's polite to also ensure CocoaPods users can also consume the code.
+Update `Sources/Version/Version.swift` with the new version number. I will be used in `x-unleash-sdk` header as a version reported to Unleash server.
+
+Then, you'll need to add a tag with the same version number as previous step. Releasing the tag is enough for the Swift package manager, but it's polite to also ensure CocoaPods users can also consume the code.
 
 ```sh
 git tag -a 0.0.4 -m "v0.0.4"

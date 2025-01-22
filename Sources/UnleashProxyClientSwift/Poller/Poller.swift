@@ -110,7 +110,7 @@ public class Poller {
         request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
         request.setValue(self.appName, forHTTPHeaderField: "x-unleash-appname")
         request.setValue(self.connectionId.uuidString, forHTTPHeaderField: "x-unleash-connection-id")
-        request.setValue("unleash-client-swift:development", forHTTPHeaderField: "x-unleash-sdk")
+        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "x-unleash-sdk")
         if !self.customHeaders.isEmpty {
             for (key, value) in self.customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)
