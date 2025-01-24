@@ -44,6 +44,10 @@ public class Poller {
         context: Context,
         completionHandler: ((PollerError?) -> Void)? = nil
     ) -> Void {
+        if self.refreshInterval == 0 {
+            return
+        }
+
         if toggles.isEmpty {
             self.getFeatures(context: context, completionHandler: completionHandler)
         } else {
