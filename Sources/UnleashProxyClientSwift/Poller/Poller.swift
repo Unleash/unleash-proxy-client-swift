@@ -44,16 +44,17 @@ public class Poller {
         context: Context,
         completionHandler: ((PollerError?) -> Void)? = nil
     ) -> Void {
-        if self.refreshInterval == 0 {
-            return
-        }
-
+  
         if toggles.isEmpty {
             self.getFeatures(context: context, completionHandler: completionHandler)
         } else {
             Printer.printMessage("Starting with provided bootstrap toggles")
             createFeatureMap(toggles: toggles)
             completionHandler?(nil)
+        }
+
+        if self.refreshInterval == 0 {
+            return
         }
 
         let timer = Timer.scheduledTimer(withTimeInterval: Double(self.refreshInterval ?? 15), repeats: true) { timer in
