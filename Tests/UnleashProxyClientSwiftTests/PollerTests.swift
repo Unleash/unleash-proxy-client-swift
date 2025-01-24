@@ -230,6 +230,17 @@ final class PollerTests: XCTestCase {
         XCTAssertEqual(poller.getFeature(name: "Bar"), stubToggles.last!)
     }
 
+    func testTimerNotInitializedWhenRefreshIntervalIsZero() {
+        let poller = Poller(
+            refreshInterval: 0,
+            unleashUrl: unleashUrl,
+            apiKey: apiKey,
+            session: MockPollerSession()
+        )
+        
+        XCTAssertNil(poller.timer, "Timer should not be initialized when refreshInterval is zero")
+    }
+
     private func createPoller(
         with session: PollerSession,
         url: URL? = nil,
