@@ -50,7 +50,9 @@ func setup(
         callback: dataGenerator,
         unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!,
         apiKey: "SECRET",
-        session: session
+        session: session,
+        appName: "APPNAME",
+        connectionId: UUID()
     )
     let metrics = MockMetrics(appName: "test")
 
@@ -80,7 +82,9 @@ func setup(
         callback: dataGenerator,
         unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!,
         apiKey: "SECRET",
-        session: session
+        session: session,
+        appName: "APPNAME",
+        connectionId: UUID()
     )
     let metrics = MockMetrics(appName: "test")
 
@@ -107,7 +111,9 @@ func setupBase(
         callback: dataGenerator,
         unleashUrl: URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!,
         apiKey: "SECRET",
-        session: session
+        session: session,
+        appName: "APPNAME",
+        connectionId: UUID()
     )
     let metrics = MockMetrics(appName: "test")
 

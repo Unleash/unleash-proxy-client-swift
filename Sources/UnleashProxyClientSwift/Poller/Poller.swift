@@ -9,7 +9,9 @@ public class Poller {
     var ready: Bool
     var apiKey: String;
     var etag: String;
-    
+    var appName: String;
+    var connectionId: UUID;
+
     private let session: PollerSession
     var storageProvider: StorageProvider
     let customHeaders: [String: String]
@@ -21,11 +23,15 @@ public class Poller {
         session: PollerSession = URLSession.shared,
         storageProvider: StorageProvider = DictionaryStorageProvider(),
         customHeaders: [String: String] = [:],
-        bootstrap: Bootstrap = .toggles([])
+        bootstrap: Bootstrap = .toggles([]),
+        appName: String,
+        connectionId: UUID
     ) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
         self.apiKey = apiKey
+        self.appName = appName
+        self.connectionId = connectionId
         self.timer = nil
         self.ready = false
         self.etag = ""
@@ -107,6 +113,9 @@ public class Poller {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.apiKey, forHTTPHeaderField: "Authorization")
         request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
+        request.setValue(self.appName, forHTTPHeaderField: "x-unleash-appname")
+        request.setValue(self.connectionId.uuidString, forHTTPHeaderField: "x-unleash-connection-id")
+        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "x-unleash-sdk")
         if !self.customHeaders.isEmpty {
             for (key, value) in self.customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)

@@ -13,6 +13,7 @@ public class Metrics {
     var bucket: Bucket
     let url: URL
     let customHeaders: [String: String]
+    let connectionId: UUID
 
     init(appName: String,
          metricsInterval: TimeInterval,
@@ -21,7 +22,8 @@ public class Metrics {
          poster: @escaping PosterHandler,
          url: URL,
          clientKey: String,
-         customHeaders: [String: String] = [:]) {
+         customHeaders: [String: String] = [:],
+         connectionId: UUID) {
         self.appName = appName
         self.metricsInterval = metricsInterval
         self.clock = clock
@@ -31,6 +33,7 @@ public class Metrics {
         self.clientKey = clientKey
         self.bucket = Bucket(clock: clock)
         self.customHeaders = customHeaders
+        self.connectionId = connectionId
     }
 
     func start() {
@@ -105,6 +108,9 @@ public class Metrics {
         request.addValue("no-cache", forHTTPHeaderField: "Cache")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue(clientKey, forHTTPHeaderField: "Authorization")
+        request.addValue(appName, forHTTPHeaderField: "x-unleash-appname")
+        request.addValue(connectionId.uuidString, forHTTPHeaderField: "x-unleash-connection-id")
+        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "x-unleash-sdk")
         if !self.customHeaders.isEmpty {
             for (key, value) in self.customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)
