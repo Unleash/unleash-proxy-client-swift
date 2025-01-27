@@ -240,7 +240,9 @@ final class PollerTests: XCTestCase {
             refreshInterval: 0,
             unleashUrl: unleashUrl,
             apiKey: apiKey,
-            session: MockPollerSession()
+            session: MockPollerSession(),
+            appName: appName,
+            connectionId: connectionId
         )
         
         XCTAssertNil(poller.timer, "Timer should not be initialized when refreshInterval is zero")
