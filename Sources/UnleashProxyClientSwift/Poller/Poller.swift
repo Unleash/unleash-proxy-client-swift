@@ -113,9 +113,9 @@ public class Poller {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.apiKey, forHTTPHeaderField: "Authorization")
         request.setValue(self.etag, forHTTPHeaderField: "If-None-Match")
-        request.setValue(self.appName, forHTTPHeaderField: "x-unleash-appname")
-        request.setValue(self.connectionId.uuidString, forHTTPHeaderField: "x-unleash-connection-id")
-        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "x-unleash-sdk")
+        request.setValue(self.appName, forHTTPHeaderField: "unleash-appname")
+        request.setValue(self.connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
+        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
         if !self.customHeaders.isEmpty {
             for (key, value) in self.customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)
