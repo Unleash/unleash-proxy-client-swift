@@ -108,9 +108,9 @@ public class Metrics {
         request.addValue("no-cache", forHTTPHeaderField: "Cache")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue(clientKey, forHTTPHeaderField: "Authorization")
-        request.addValue(appName, forHTTPHeaderField: "x-unleash-appname")
-        request.addValue(connectionId.uuidString, forHTTPHeaderField: "x-unleash-connection-id")
-        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "x-unleash-sdk")
+        request.addValue(appName, forHTTPHeaderField: "unleash-appname")
+        request.addValue(connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
+        request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
         if !self.customHeaders.isEmpty {
             for (key, value) in self.customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)

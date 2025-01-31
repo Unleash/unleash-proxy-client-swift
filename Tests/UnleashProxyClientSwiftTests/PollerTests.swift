@@ -199,9 +199,9 @@ final class PollerTests: XCTestCase {
         session.performRequestHandler = { request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "X-Custom-Header"), "CustomValue")
             XCTAssertEqual(request.value(forHTTPHeaderField: "X-Another-Header"), "AnotherValue")
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-unleash-appname"), "APPNAME")
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-unleash-connection-id"), "123E4567-E89B-12D3-A456-426614174000")
-            XCTAssertTrue(request.value(forHTTPHeaderField: "x-unleash-sdk")!.range(of: #"^unleash-client-swift:\d+\.\d+\.\d+$"#, options: .regularExpression) != nil, "x-unleash-sdk header sdk:semver format does not match")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "unleash-appname"), "APPNAME")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "unleash-connection-id"), "123E4567-E89B-12D3-A456-426614174000")
+            XCTAssertTrue(request.value(forHTTPHeaderField: "unleash-sdk")!.range(of: #"^unleash-client-swift:\d+\.\d+\.\d+$"#, options: .regularExpression) != nil, "unleash-sdk header sdk:semver format does not match")
             expectation.fulfill()
         }
 
