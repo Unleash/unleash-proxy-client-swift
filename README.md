@@ -99,18 +99,19 @@ if variant.enabled {
 
 The Unleash SDK takes the following options:
 
-| option            | required | default                   | description                                                                                                                                      |
-|-------------------|----------|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| unleashUrl        | yes | n/a                       | The Unleash Edge/Proxy URL to connect to. E.g.: `https://examples.com/proxy`                                                                         |
-| clientKey         | yes | n/a                       | The Unleash Edge/Proxy Secret to be used                                                                                                             | 
-| appName           | no | unleash-swift-client       | The name of the application using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context. |
-| environment       | no | default                    | The name of the environment using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context. | 
-| refreshInterval   | no | 15                        | How often, in seconds, the SDK should check for updated toggle configuration. If set to 0 will disable checking for updates                 |
-| metricsInterval   | no | 30                        | How often, in seconds, the SDK should send usage metrics back to Unleash Edge/Proxy                                                              | 
-| disableMetrics    | no | false                     | Set this option to `true` if you want to disable usage metrics
-| context           | no | [:]                     | The initial context parameters except from `appName` and `environment which are specified as top level fields
-| customHeaders     | no| `[:]`                      | Additional headers to use when making HTTP requests to the Unleash Edge/Proxy. In case of name collisions with the default headers, the `customHeaders` value will be used. |
-| bootstrap          | no | empty list of toggles     | The Unleash Edge/Proxy SDK can be initialised with an initial set of toggles, read from either a list of Toggles, or a jsonFile matching the structure of the response from the frontend API. These will be available instantly before the initial fetch.
+| option                | required | default                        | description                                                                                                                                                                                                                                               |
+|-----------------------|----------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| unleashUrl            | yes      | n/a                            | The Unleash Edge/Proxy URL to connect to. E.g.: `https://examples.com/proxy`                                                                                                                                                                              |
+| clientKey             | yes      | n/a                            | The Unleash Edge/Proxy Secret to be used                                                                                                                                                                                                                  |
+| appName               | no       | unleash-swift-client           | The name of the application using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context.                                                                                                     |
+| environment           | no       | default                        | The name of the environment using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context.                                                                                                     |
+| refreshInterval       | no       | 15                             | How often, in seconds, the SDK should check for updated toggle configuration. If set to 0 will disable checking for updates                                                                                                                               |
+| metricsInterval       | no       | 30                             | How often, in seconds, the SDK should send usage metrics back to Unleash Edge/Proxy                                                                                                                                                                       |
+| disableMetrics        | no       | false                          | Set this option to `true` if you want to disable usage metrics                                                                                                                                                                                            |
+| context               | no       | [:]                            | The initial context parameters except from `appName` and `environment which are specified as top level fields                                                                                                                                             |
+| customHeaders         | no       | `[:]`                          | Additional headers to use when making HTTP requests to the Unleash Edge/Proxy. In case of name collisions with the default headers, the `customHeaders` value will be used.                                                                               |
+| customHeadersProvider | no       | `DefaultCustomHeadersProvider` | Custom header provider for additional headers. In case of name collisions with the `customHeaders`, the `customHeadersProvider` value will be used.                                                                                                       |
+| bootstrap             | no       | empty list of toggles          | The Unleash Edge/Proxy SDK can be initialised with an initial set of toggles, read from either a list of Toggles, or a jsonFile matching the structure of the response from the frontend API. These will be available instantly before the initial fetch. |
 
 ### Bootstrapping
 You can provide the initial toggle state to the Unleash client SDK. This is useful when you have a known initial state for your feature toggles. This toggle state can be bootstrapped to the client via a list of toggles, or from a file matching a response from the [frontend API](https://docs.getunleash.io/reference/front-end-api). For example:
@@ -232,6 +233,50 @@ properties["customKey"] = "customValue";
 unleash.updateContext(context: context, properties: properties)
 ```
 
+### Custom HTTP headers
+If you want the client to send custom HTTP Headers with all requests to the Unleash API
+you can define that by setting them via the `UnleashClientBase`.
+
+Custom and dynamic custom headers does not apply to sensitive headers.
+- `Content-Type`
+- `If-None-Match`
+- anything starting with `unleash-` (`unleash-appname`, `unleash-connection-id`, `unleash-sdk`, ...)
+
+```swift
+var unleash = UnleashProxyClientSwift.UnleashClientBase(
+    unleashUrl: unleashUrl,
+    clientKey: clientKey,
+    refreshInterval: 15,
+    appName: "test",
+    context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"],
+    customHeaders: ["X-Custom-Header": "CustomValue", "X-Another-Header": "AnotherValue"]
+)
+```
+
+### Dynamic custom HTTP headers
+If you need custom http headers that change during the lifetime of the client, a provider can be defined via the `UnleashClientBase`.
+
+```swift
+public class MyCustomHeadersProvider: CustomHeadersProvider {
+    public init() {}
+    public func getCustomHeaders() -> [String: String] {
+        let token = "Acquire or refresh token";
+        return ["Authorization": "Bearer" + token]
+    }
+}
+```
+```swift
+let myCustomHeadersProvider: CustomHeadersProvider = MyCustomHeadersProvider()
+
+var unleash = UnleashProxyClientSwift.UnleashClientBase(
+        unleashUrl: unleashUrl,
+        clientKey: clientKey,
+        refreshInterval: 15,
+        appName: "test",
+        context: ["userId": "c3b155b0-5ebe-4a20-8386-e0cab160051e"],
+        customHeadersProvider: myCustomHeadersProvider
+)
+```
 
 ## Events
 
