@@ -149,15 +149,30 @@ final class PollerTests: XCTestCase {
         for statusCode in 400..<599 {
             let response = mockResponse(statusCode: statusCode)
             let data = stubData()
-            let session = MockPollerSession(data: data, response: response)
+            let session = MockPollerSession(data: data, response: response, error: MockError.failure)
             let poller = createPoller(with: session)
             let expectation = XCTestExpectation(description: "Expect .network PollerError for status: \(statusCode).")
             poller.start(context: Context()) { error in
-                XCTAssertEqual(error, .network)
+                guard case let .network(mockError) = error else { return }
+                XCTAssertEqual(mockError as? MockError, .failure)
                 expectation.fulfill()
             }
             wait(for: [expectation], timeout: timeout)
         }
+    }
+
+    func testStartCompletesWithUnhandledStatusCodeError() {
+        let response = mockResponse(statusCode: 300)
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = createPoller(with: session)
+        let expectation = XCTestExpectation(description: "Expect .unhandledStatusCode PollerError for status code 300.")
+        poller.start(context: Context()) { error in
+            guard case let .unhandledStatusCode(statusCode) = error else { return }
+            XCTAssertEqual(statusCode, 300)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
     }
 
     func testStartCompletesWithDecodingError() {
@@ -168,7 +183,19 @@ final class PollerTests: XCTestCase {
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect .decoding PollerError.")
         poller.start(context: Context()) { error in
-            XCTAssertEqual(error, .decoding)
+            guard case .decoding = error else { return }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: timeout)
+    }
+
+    func testStartCompletesWithNoResponseError() {
+        let session = MockPollerSession(data: Data(), response: nil, error: MockError.failure)
+        let poller = createPoller(with: session)
+        let expectation = XCTestExpectation(description: "Expect .noResponse PollerError.")
+        poller.start(context: Context()) { error in
+            guard case let .noResponse(mockError) = error else { return }
+            XCTAssertEqual(mockError as? MockError, .failure)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: timeout)
@@ -284,4 +311,8 @@ final class PollerTests: XCTestCase {
         ]
         return try! JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)
     }
+}
+
+private enum MockError: Error {
+    case failure
 }

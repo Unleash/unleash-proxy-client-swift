@@ -1,7 +1,7 @@
 public enum PollerError: Error {
-    case decoding
-    case network
+    case decoding(Error)
+    case network(Error?)
     case url
-    case noResponse
-    case unhandledStatusCode
+    case noResponse(Error?)
+    case unhandledStatusCode(Int)
 }

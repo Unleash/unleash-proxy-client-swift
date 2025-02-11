@@ -126,7 +126,7 @@ public class Poller {
         session.perform(request) { (data, response, error) in
             guard let httpResponse = response as? HTTPURLResponse else {
                 Printer.printMessage("No response")
-                completionHandler?(.noResponse)
+                completionHandler?(.noResponse(error))
                 return
             }
 
@@ -137,7 +137,7 @@ public class Poller {
             }
             
             if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
-                completionHandler?(.network)
+                completionHandler?(.network(error))
                 Printer.printMessage("Error fetching toggles")
                 return
             }
@@ -150,7 +150,7 @@ public class Poller {
 
             guard httpResponse.statusCode == 200 else {
                 Printer.printMessage("Unhandled status code")
-                completionHandler?(.unhandledStatusCode)
+                completionHandler?(.unhandledStatusCode(httpResponse.statusCode))
                 return
             }
 
@@ -164,10 +164,10 @@ public class Poller {
                 result = try JSONDecoder().decode(FeatureResponse.self, from: data)
             } catch {
                 Printer.printMessage(error.localizedDescription)
+                completionHandler?(.decoding(error))
             }
             
             guard let decodedResponse = result else {
-                completionHandler?(.decoding)
                 return
             }
             
