@@ -188,7 +188,7 @@ final class PollerTests: XCTestCase {
     }
     
     func testCustomHeaders() {
-        let customHeaders: [String: String] = ["X-Custom-Header": "CustomValue", "X-Another-Header": "AnotherValue"]
+        let customHeaders: [String: String] = ["X-Custom-Header": "CustomValue", "X-Another-Header": "AnotherValue", "unleash-appname": "Should be ignored", "Content-Type": "Should be ignored", "If-None-Match": "Should be ignored"]
         let response = mockResponse()
         let data = stubData()
         let session = MockPollerSession(data: data, response: response)
@@ -197,6 +197,8 @@ final class PollerTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Expect custom headers to be set in the request.")
 
         session.performRequestHandler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "If-None-Match"), "")
             XCTAssertEqual(request.value(forHTTPHeaderField: "X-Custom-Header"), "CustomValue")
             XCTAssertEqual(request.value(forHTTPHeaderField: "X-Another-Header"), "AnotherValue")
             XCTAssertEqual(request.value(forHTTPHeaderField: "unleash-appname"), "APPNAME")
@@ -208,7 +210,32 @@ final class PollerTests: XCTestCase {
         poller.getFeatures(context: Context())
         wait(for: [expectation], timeout: timeout)
     }
-    
+
+    func testCustomHeadersProvider() {
+        let customHeaders: [String: String] = ["X-Custom-Header": "CustomValue", "X-Another-Header": "AnotherValue", "unleash-appname": "Should be ignored", "Content-Type": "Should be ignored", "If-None-Match": "Should be ignored"]
+        let mockCustomHeadersProvider: CustomHeadersProvider = MockCustomHeadersProvider(customHeaders: ["X-Another-Header": "AnotherValue-2", "unleash-appname": "Should be ignored", "Content-Type": "Should be ignored", "If-None-Match": "Should be ignored"])
+        let response = mockResponse()
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = Poller(refreshInterval: nil, unleashUrl: unleashUrl, apiKey: apiKey, session: session, customHeaders: customHeaders, customHeadersProvider: mockCustomHeadersProvider, appName: appName, connectionId: connectionId)
+
+        let expectation = XCTestExpectation(description: "Expect custom headers to be set in the request.")
+
+        session.performRequestHandler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "If-None-Match"), "")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "X-Custom-Header"), "CustomValue")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "X-Another-Header"), "AnotherValue-2")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "unleash-appname"), "APPNAME")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "unleash-connection-id"), "123E4567-E89B-12D3-A456-426614174000")
+            XCTAssertTrue(request.value(forHTTPHeaderField: "unleash-sdk")!.range(of: #"^unleash-client-swift:\d+\.\d+\.\d+$"#, options: .regularExpression) != nil, "unleash-sdk header sdk:semver format does not match")
+            expectation.fulfill()
+        }
+
+        poller.getFeatures(context: Context())
+        wait(for: [expectation], timeout: timeout)
+    }
+
     func testGivenBoostrappingTogglesWhenStartThenSetToggles() {
         let stubToggles = [
             Toggle(name: "Foo", enabled: false),
@@ -283,5 +310,17 @@ final class PollerTests: XCTestCase {
             ]
         ]
         return try! JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)
+    }
+}
+
+private class MockCustomHeadersProvider: CustomHeadersProvider {
+    private let customHeaders: [String:String]
+
+    init(customHeaders: [String:String]) {
+        self.customHeaders = customHeaders
+    }
+
+    public func getCustomHeaders() -> [String: String] {
+        return customHeaders
     }
 }

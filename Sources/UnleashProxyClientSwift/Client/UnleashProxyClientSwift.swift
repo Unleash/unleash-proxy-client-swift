@@ -21,6 +21,7 @@ public class UnleashClientBase {
         poller: Poller? = nil,
         metrics: Metrics? = nil,
         customHeaders: [String: String] = [:],
+        customHeadersProvider: CustomHeadersProvider = DefaultCustomHeadersProvider(),
         bootstrap: Bootstrap = .toggles([])
     ) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
@@ -37,6 +38,7 @@ public class UnleashClientBase {
                 unleashUrl: url,
                 apiKey: clientKey,
                 customHeaders: customHeaders,
+                customHeadersProvider: customHeadersProvider,
                 bootstrap: bootstrap,
                 appName: appName,
                 connectionId: connectionId

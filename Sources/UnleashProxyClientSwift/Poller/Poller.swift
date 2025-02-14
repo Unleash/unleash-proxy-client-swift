@@ -15,6 +15,7 @@ public class Poller {
     private let session: PollerSession
     var storageProvider: StorageProvider
     let customHeaders: [String: String]
+    let customHeadersProvider: CustomHeadersProvider
 
     public init(
         refreshInterval: Int? = nil,
@@ -23,6 +24,7 @@ public class Poller {
         session: PollerSession = URLSession.shared,
         storageProvider: StorageProvider = DictionaryStorageProvider(),
         customHeaders: [String: String] = [:],
+        customHeadersProvider: CustomHeadersProvider = DefaultCustomHeadersProvider(),
         bootstrap: Bootstrap = .toggles([]),
         appName: String,
         connectionId: UUID
@@ -38,7 +40,8 @@ public class Poller {
         self.session = session
         self.storageProvider = storageProvider
         self.customHeaders = customHeaders
-        
+        self.customHeadersProvider = customHeadersProvider
+
         let toggles = bootstrap.toggles
         if toggles.isEmpty == false {
             createFeatureMap(toggles: toggles)
@@ -97,7 +100,7 @@ public class Poller {
     public func getFeature(name: String) -> Toggle? {
         return self.storageProvider.value(key: name);
     }
-    
+
     func getFeatures(
         context: Context,
         completionHandler: ((PollerError?) -> Void)? = nil
@@ -116,8 +119,13 @@ public class Poller {
         request.setValue(self.appName, forHTTPHeaderField: "unleash-appname")
         request.setValue(self.connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
         request.setValue("unleash-client-swift:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
-        if !self.customHeaders.isEmpty {
-            for (key, value) in self.customHeaders {
+
+        let customHeaders = self.customHeaders.merging(self.customHeadersProvider.getCustomHeaders()) { (_, new) in
+            new
+        }.filter { key, _ in !isSensitiveHeader(key) }
+
+        if !customHeaders.isEmpty {
+            for (key, value) in customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)
             }
         }
@@ -183,6 +191,13 @@ public class Poller {
             
             completionHandler?(nil)
         }
+    }
+
+    private func isSensitiveHeader(_ header: String) -> Bool {
+        let lowercasedHeader = header.lowercased()
+        return lowercasedHeader == "content-type" ||
+                lowercasedHeader == "if-none-match" ||
+                lowercasedHeader.hasPrefix("unleash-")
     }
 }
 
