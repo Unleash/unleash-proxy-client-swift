@@ -261,7 +261,7 @@ public class MyCustomHeadersProvider: CustomHeadersProvider {
     public init() {}
     public func getCustomHeaders() -> [String: String] {
         let token = "Acquire or refresh token";
-        return ["Authorization": "Bearer" + token]
+        return ["Authorization": token]
     }
 }
 ```
