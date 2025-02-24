@@ -6,9 +6,9 @@ public class DictionaryStorageProvider: StorageProvider {
 
     public init() {}
 
-    public func set(value: Toggle?, key: String) {
+    public func set(values: [String: Toggle]) {
         queue.async {
-            self.storage[key] = value
+            self.storage = values
         }
     }
 

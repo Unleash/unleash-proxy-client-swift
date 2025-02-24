@@ -94,7 +94,10 @@ public class Poller {
     
     private func createFeatureMap(toggles: [Toggle]) {
         storageProvider.clear()
-        toggles.forEach { storageProvider.set(value: $0, key: $0.name) }
+        let values = Dictionary(
+            uniqueKeysWithValues: toggles.map { ($0.name, $0) }
+        )
+        storageProvider.set(values: values)
     }
     
     public func getFeature(name: String) -> Toggle? {
