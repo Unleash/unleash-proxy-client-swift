@@ -38,6 +38,10 @@ public class MockDictionaryStorageProvider: StorageProvider {
         storage[key] = value
     }
 
+    public func reset(keyedValues: [String : Toggle]) {
+        storage = keyedValues
+    }
+
     public func value(key: String) -> Toggle? {
         return storage[key]
     }
