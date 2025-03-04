@@ -12,6 +12,12 @@ public class DictionaryStorageProvider: StorageProvider {
         }
     }
 
+    public func reset(keyedValues: [String : Toggle]) {
+        queue.sync {
+            self.storage = keyedValues
+        }
+    }
+
     public func value(key: String) -> Toggle? {
         queue.sync {
             return self.storage[key]
