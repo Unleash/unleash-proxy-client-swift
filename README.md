@@ -109,6 +109,7 @@ The Unleash SDK takes the following options:
 | metricsInterval       | no       | 30                             | How often, in seconds, the SDK should send usage metrics back to Unleash Edge/Proxy                                                                                                                                                                       |
 | disableMetrics        | no       | false                          | Set this option to `true` if you want to disable usage metrics                                                                                                                                                                                            |
 | context               | no       | [:]                            | The initial context parameters except from `appName` and `environment which are specified as top level fields                                                                                                                                             |
+| pollerSession         | no       | `URLSession.shared`            | Session object used for performing HTTP requests. You can provide a custom PollerSession for custom URLSession configuration or URLRequest interception.             |
 | customHeaders         | no       | `[:]`                          | Additional headers to use when making HTTP requests to the Unleash Edge/Proxy. In case of name collisions with the default headers, the `customHeaders` value will be used.                                                                               |
 | customHeadersProvider | no       | `DefaultCustomHeadersProvider` | Custom header provider for additional headers. In case of name collisions with the `customHeaders`, the `customHeadersProvider` value will be used.                                                                                                       |
 | bootstrap             | no       | empty list of toggles          | The Unleash Edge/Proxy SDK can be initialised with an initial set of toggles, read from either a list of Toggles, or a jsonFile matching the structure of the response from the frontend API. These will be available instantly before the initial fetch. |
@@ -231,6 +232,33 @@ context["userId"] = "c3b155b0-5ebe-4a20-8386-e0cab160051e"
 var properties: [String: String] = [:]
 properties["customKey"] = "customValue";
 unleash.updateContext(context: context, properties: properties)
+```
+
+### Custom PollerSession
+If you want to use a custom `URLSession` or intercept `URLRequest` you can provide a custom `PollerSession` to the client.
+
+```swift
+class CustomPollerSession: PollerSession {
+    func perform(_ request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) {
+        // Custom URLSession configuration
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 30
+
+        // Modify URLRequest if needed
+        var modifiedRequest = request
+        modifiedRequest.setValue("foo", forHTTPHeaderField: "bar")
+        
+        let session = URLSession(configuration: configuration)
+        session.dataTask(with: modifiedRequest, completionHandler: completionHandler).resume()
+    }
+}
+
+// Use when initializing Unleash client
+var unleash = UnleashProxyClientSwift.UnleashClient(
+    unleashUrl: unleashUrl,
+    clientKey: clientKey,
+    pollerSession: CustomPollerSession()
+)
 ```
 
 ### Custom HTTP headers
