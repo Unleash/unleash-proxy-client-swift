@@ -9,6 +9,14 @@ The unleash-proxy-client-swift will then cache these toggles in a map in memory 
 - MacOS: 12.15
 - iOS: 12
 
+## Upgrade guide from 1.x -> 2.x
+In 2.0.0 the StorageProvider public interface [was changed](https://github.com/Unleash/unleash-proxy-client-swift/pull/113) to be more in line with other SDKs. Specifically the set method was changed to accept all flags at once. It now has the following interface: 
+```
+func set(values: [String: Toggle])
+```
+
+If you are running with your own StorageProvider implementation you'll need to make changes to your implementation.
+
 ## Installation
 
 Follow the following steps in order to install the unleash-proxy-client-swift:
