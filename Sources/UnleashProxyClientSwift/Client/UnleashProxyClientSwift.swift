@@ -29,11 +29,12 @@ public class UnleashClientBase {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
-        self.connectionId = UUID()
         self.timer = nil
         if let poller = poller {
             self.poller = poller
+            self.connectionId = poller.connectionId
         } else {
+            self.connectionId = UUID()
             self.poller = Poller(
                 refreshInterval: refreshInterval,
                 unleashUrl: url,
