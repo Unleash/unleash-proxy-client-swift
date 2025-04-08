@@ -86,21 +86,44 @@ public class UnleashClientBase {
     public func stop() -> Void {
         poller.stop()
         metrics.stop()
+        SwiftEventBus.unregister(self)
     }
 
     public func isEnabled(name: String) -> Bool {
-        let enabled = poller.getFeature(name: name)?.enabled ?? false
+        let toggle = poller.getFeature(name: name)
+        let enabled = toggle?.enabled ?? false
         metrics.count(name: name, enabled: enabled)
+        
+        if let toggle = toggle, toggle.impressionData {
+            SwiftEventBus.post("impression", sender: ImpressionEvent(
+                toggleName: name,
+                enabled: enabled,
+                context: context
+            ))
+        }
+        
         return enabled
     }
 
     public func getVariant(name: String) -> Variant {
-        let variant = poller
-            .getFeature(name: name)?
-            .variant ?? .defaultDisabled
+        let toggle = poller.getFeature(name: name)
+        let variant = toggle?.variant ?? .defaultDisabled
+        let enabled = toggle?.enabled ?? false
+
         
-        metrics.count(name: name, enabled: variant.enabled)
+        metrics.count(name: name, enabled: enabled)
         metrics.countVariant(name: name, variant: variant.name)
+        
+        if let toggle = toggle, toggle.impressionData {
+            
+            SwiftEventBus.post("impression", sender: ImpressionEvent(
+                toggleName: name,
+                enabled: enabled,
+                variant: variant,
+                context: context
+            ))
+        }
+        
         return variant
     }
 
@@ -120,6 +143,24 @@ public class UnleashClientBase {
     
     public func subscribe(_ event: UnleashEvent, callback: @escaping () -> Void) {
         subscribe(name: event.rawValue, callback: callback)
+    }
+
+    public func subscribe(_ event: UnleashEvent, callback: @escaping (Any?) -> Void) {
+        subscribe(name: event.rawValue, callback: callback)
+    }
+
+    public func subscribe(name: String, callback: @escaping (Any?) -> Void) {
+        let handler: (Notification?) -> Void = { notification in
+            callback(notification?.object)
+        }
+        
+        if Thread.isMainThread {
+            print("Subscribing to \(name) on main thread with object")
+            SwiftEventBus.onMainThread(self, name: name, handler: handler)
+        } else {
+            print("Subscribing to \(name) on background thread with object")
+            SwiftEventBus.onBackgroundThread(self, name: name, handler: handler)
+        }
     }
 
     public func unsubscribe(name: String) {
