@@ -8,4 +8,6 @@ public enum UnleashEvent: String, CaseIterable {
     case sent
     /// Emitted when metrics failed to send
     case error
+    /// Emitted when a toggle with impression data is evaluated
+    case impression
 }

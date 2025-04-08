@@ -17,7 +17,6 @@ class UnleashIntegrationTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        UnleashEvent.allCases.forEach { unleashClient.unsubscribe($0) }
         unleashClient.stop()
     }
 
