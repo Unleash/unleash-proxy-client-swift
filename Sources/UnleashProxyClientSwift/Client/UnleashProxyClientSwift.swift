@@ -92,6 +92,7 @@ public class UnleashClientBase {
     public func isEnabled(name: String) -> Bool {
         let toggle = poller.getFeature(name: name)
         let enabled = toggle?.enabled ?? false
+        
         metrics.count(name: name, enabled: enabled)
         
         if let toggle = toggle, toggle.impressionData {
@@ -110,12 +111,10 @@ public class UnleashClientBase {
         let variant = toggle?.variant ?? .defaultDisabled
         let enabled = toggle?.enabled ?? false
 
-        
         metrics.count(name: name, enabled: enabled)
         metrics.countVariant(name: name, variant: variant.name)
         
-        if let toggle = toggle, toggle.impressionData {
-            
+        if let toggle = toggle, toggle.impressionData {   
             SwiftEventBus.post("impression", sender: ImpressionEvent(
                 toggleName: name,
                 enabled: enabled,
