@@ -74,7 +74,7 @@ public class UnleashClientBase {
         completionHandler: ((PollerError?) -> Void)? = nil
     ) -> Void {
         Printer.showPrintStatements = printToConsole
-        self.stop()
+        self.stopPolling()
         poller.start(
             bootstrapping: bootstrap.toggles,
             context: context,
@@ -83,10 +83,14 @@ public class UnleashClientBase {
         metrics.start()
     }
 
-    public func stop() -> Void {
+    private func stopPolling() -> Void {
         poller.stop()
         metrics.stop()
-        SwiftEventBus.unregister(self)
+    }
+
+    public func stop() -> Void {
+        self.stopPolling();
+        UnleashEvent.allCases.forEach { self.unsubscribe($0) }
     }
 
     public func isEnabled(name: String) -> Bool {
