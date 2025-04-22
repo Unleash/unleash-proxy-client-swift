@@ -66,7 +66,7 @@ In the example above we import the UnleashProxyClientSwift and instantiate the c
 - `clientKey`: A [frontend API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) for authenticating with the Frontend API or Unleash Edge [String]
 - `refreshInterval`: The polling interval in seconds, set to `0` to only poll once and disable a periodic polling [Int]
 - `appName`: The application name identifier [String]
-- `context`: Initial Unleash Context fields (like `userId`, `sessionId`, etc.), excluding `appName` and `environment` which are configured separately. [String: String]
+- `context`: Initial Unleash context fields (like `userId`, `sessionId`, etc.), excluding `appName` and `environment` which are configured separately. [String: String]
 
 Calling `unleash.start()` makes the initial request to retrieve the feature flag configuration and starts the background polling interval (if `refreshInterval > 0`).
 
@@ -101,8 +101,8 @@ The Unleash SDK accepts the following initialization options:
 |-----------------------|----------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | unleashUrl            | yes      | n/a                            | The Unleash Edge URL to connect to.                                                                                                                                                                              |
 | clientKey             | yes      | n/a                            | The frontend token to use for authenticating with the Frontend API or Unleash Edge.                                                                                                                                                                                                                  |
-| appName               | no       | unleash-swift-client           | The name of the application using this SDK. Sent with metrics to Unleash Edge and included in the Unleash Context.                                                                                                     |
-| environment           | no       | default                        | The name of the environment. Sent with metrics to Unleash Edge and included in the Unleash Context.                                                                                                     |
+| appName               | no       | unleash-swift-client           | The name of the application using this SDK. Sent with metrics to Unleash Edge and included in the Unleash context.                                                                                                     |
+| environment           | no       | default                        | The name of the environment. Sent with metrics to Unleash Edge and included in the Unleash context.                                                                                                     |
 | refreshInterval       | no       | 15                             | How often (in seconds) the SDK checks for updated flag configurations. Set to 0 to disable polling after initial fetch.                                                                                                                               |
 | metricsInterval       | no       | 30                             | How often (in seconds) the SDK sends usage metrics back to Unleash Edge. |                                                                                                       |
 | disableMetrics        | no       | false                          | Set this to `true` to disable usage metrics.                                                                                                                                                                                            |
@@ -111,10 +111,10 @@ The Unleash SDK accepts the following initialization options:
 | pollerSession         | no       | `URLSession.shared`            | Session object used for performing HTTP requests. You can provide a custom `PollerSession` for custom `URLSession` configuration or `URLRequest` interception.             |
 | customHeaders         | no       | `[:]`                          | Additional headers to use when making HTTP requests to Unleash Edge. In case of name collisions with the default headers, the `customHeaders` value will be used.                                                                               |
 | customHeadersProvider | no       | `DefaultCustomHeadersProvider` | Custom header provider for additional headers. In case of name collisions with the `customHeaders`, the `customHeadersProvider` value will be used.                                                                                                       |
-| bootstrap             | no       | empty list of toggles          | Initial flag configurations provided to the Unleash client SDK. Can be a list of `Toggle` objects or the path to a JSON file matching the front-end API response format. Available immediately on init, before the first fetch. |
+| bootstrap             | no       | empty list of feature flags    | Initial flag configurations provided to the Unleash client SDK. Can be a list of `Toggle` objects or the path to a JSON file matching the front-end API response format. Available immediately on init, before the first fetch. |
 
 ### Bootstrapping
-You can provide the initial toggle state to the Unleash client SDK. This is useful when you have a known initial state for your feature toggles. This toggle state can be bootstrapped to the client via a list of toggles, or from a file matching a response from the [Frontend API](https://docs.getunleash.io/reference/front-end-api). For example:
+You can provide the initial feature flag state to the Unleash client SDK. This is useful when you have a known initial state for your feature flag. This state can be bootstrapped to the client via a list of `Toggle` objects, or from a file matching a response from the [Frontend API](https://docs.getunleash.io/reference/front-end-api). For example:
 
 #### Bootstrap from hard-coded list
 ```swift
