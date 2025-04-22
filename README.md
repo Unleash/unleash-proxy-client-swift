@@ -1,17 +1,17 @@
 # Unleash Swift SDK
 
-Unleash is a private, secure, and scalable [feature management platform](https://www.getunleash.io/) built to reduce the risk of releasing new features and accelerate software development. This client-side Swift SDK is designed to help you integrate with Unleash and evaluate feature flags inside your application.
+Unleash is a private, secure, and scalable [feature management platform](https://www.getunleash.io/) built to reduce the risk of releasing new features and accelerate software development. This client-side Swift SDK helps you integrate with Unleash and evaluate feature flags inside your application.
 
 You can use this client with [Unleash Enterprise](https://www.getunleash.io/pricing?utm_source=readme&utm_medium=swift) or [Unleash Open Source](https://github.com/Unleash/unleash).
 
-You can connect the SDK to Unleash in two primary ways:
+You can connect the SDK to Unleash in two ways:
 
 - **Directly** to your Unleash instance using the [Frontend API](https://docs.getunleash.io/reference/front-end-api).
-- **Using Unleash Edge:** Connect via [Unleash Edge](https://docs.getunleash.io/reference/unleash-edge), a lightweight service acting as a caching and evaluation layer between the SDK and your main Unleash instance. Edge fetches flag configurations, caches them in-memory, and handles evaluation locally for faster responses and high availability.
+- **Using Unleash Edge**, a lightweight service acting as a caching and evaluation layer between the SDK and your main Unleash instance. [Unleash Edge](https://docs.getunleash.io/reference/unleash-edgefetches flag configurations, caches them in-memory, and handles evaluation locally for faster responses and high availability.
 
-In both modes, the SDK retrieves feature flag configurations for the provided [context](https://docs.getunleash.io/docs/user_guide/unleash_context). The SDK caches the received flag configurations in memory and refreshes them periodically (at a configurable interval). This makes local evaluations like `isEnabled()` extremely fast.
+In both setups, the SDK retrieves feature flag configurations for the provided [context](https://docs.getunleash.io/docs/user_guide/unleash_context). The SDK caches the received flag configurations in memory and refreshes them periodically (at a configurable interval). This makes local evaluations like `isEnabled()` extremely fast.
 
-> Note: If you're current implementation relies on Unleash Proxy, please review our guide on how to migrate to [Unleash Edge](https://docs.getunleash.io/reference/unleash-edge/migration-guide).
+> Note: If your current implementation relies on Unleash Proxy, please review our guide on how to [migrate to Unleash Edge](https://docs.getunleash.io/reference/unleash-edge/migration-guide).
 
 ## Requirements
 
@@ -63,10 +63,10 @@ unleash.start()
 In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters:
 
 - `unleashUrl`: The full URL to either the [Unleash Frontend API](https://docs.getunleash.io/reference/front-end-api) or an [Unleash Edge instance](https://docs.getunleash.io/reference/unleash-edge) [String]
-- `clientKey`: A [frontend API tokens](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) for authenticating with the Frontend API or Unleash Edge [String]
+- `clientKey`: A [frontend API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) for authenticating with the Frontend API or Unleash Edge [String]
 - `refreshInterval`: The polling interval in seconds, set to `0` to only poll once and disable a periodic polling [Int]
 - `appName`: The application name identifier [String]
-- `context`: Initial Unleash Context fields (like `userId`, `sessionId`, etc.), excluding `appName` and `environment` which are configured separately. [[String: String]]
+- `context`: Initial Unleash Context fields (like `userId`, `sessionId`, etc.), excluding `appName` and `environment` which are configured separately. [String: String]
 
 Calling `unleash.start()` makes the initial request to retrieve the feature flag configuration and starts the background polling interval (if `refreshInterval > 0`).
 
@@ -176,7 +176,7 @@ guard let filePath = Bundle.main.path(forResource: "FeatureResponseFile", ofType
     // Handle missing file
 }
 
-let boostrapFile = Bootstrap.jsonFile(path: filePath)
+let bootstrapFile = Bootstrap.jsonFile(path: filePath)
 ```
 
 #### Using the bootstrap list of toggles
@@ -372,13 +372,13 @@ Note: To release the package you'll need to have [CocoaPods](https://cocoapods.o
 
 Update `Sources/Version/Version.swift` with the new version number. This version is used in `unleash-sdk` header as a version reported to Unleash server.
 
-Then, add a Git tag macthing the version number. Releasing the tag is sufficient for the Swift package manager, but you might also want to ensure CocoaPods users can also consume the code.
+Then, add a Git tag matching the version number. Releasing the tag is sufficient for the Swift package manager, but you might also want to ensure CocoaPods users can also consume the code.
 
 ```sh
 git tag -a 0.0.4 -m "v0.0.4"
 ```
 
-Please make sure that the tag is pushed to remote.
+Please make sure that the tag is pushed to the remote.
 
 The next few commands assume that you have CocoaPods installed and available on your shell.
 
@@ -388,7 +388,7 @@ First, validate your session with CocoaPods with the following command:
 pod trunk register <email> "Your name"
 ```
 
-The email that owns this package is the general Unleash team email. Cocoapods will send a link to this email, click it to validate your shell session.
+The email that owns this package is the general Unleash team email. CocoaPods will send a link to this email, click it to validate your shell session.
 
 Bump the version number of the package, you can find this in `UnleashProxyClientSwift.podspec`, we use SemVer for this project. Once that's committed and merged to main:
 
