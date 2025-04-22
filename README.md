@@ -1,36 +1,26 @@
-# unleash-proxy-client-swift
+# Unleash Swift SDK
 
-The unleash-proxy-client-swift makes it easy for native applications and other swift platforms to connect to the unleash proxy. The proxy will evaluate a feature toggle for a given [context](https://docs.getunleash.io/docs/user_guide/unleash_context) and return a list of feature flags relevant for the provided context.
+Unleash is a private, secure, and scalable [feature management platform](https://www.getunleash.io/) built to reduce the risk of releasing new features and accelerate software development. This client-side Swift SDK is designed to help you integrate with Unleash and evaluate feature flags inside your application.
 
-The unleash-proxy-client-swift will then cache these toggles in a map in memory and refresh the configuration at a configurable interval, making queries against the toggle configuration extremely fast.
+You can use this client with [Unleash Enterprise](https://www.getunleash.io/pricing?utm_source=readme&utm_medium=swift) or [Unleash Open Source](https://github.com/Unleash/unleash).
+
+You can connect the SDK to Unleash in two primary ways:
+
+- **Directly** to your Unleash instance using the [Frontend API](https://docs.getunleash.io/reference/front-end-api).
+- **Using Unleash Edge:** Connect via [Unleash Edge](https://docs.getunleash.io/reference/unleash-edge), a lightweight service acting as a caching and evaluation layer between the SDK and your main Unleash instance. Edge fetches flag configurations, caches them in-memory, and handles evaluation locally for faster responses and high availability.
+
+In both modes, the SDK retrieves feature flag configurations for the provided [context](https://docs.getunleash.io/docs/user_guide/unleash_context). The SDK caches the received flag configurations in memory and refreshes them periodically (at a configurable interval). This makes local evaluations like `isEnabled()` extremely fast.
+
+> Note: If you're current implementation relies on Unleash Proxy, please review our guide on how to migrate to [Unleash Edge](https://docs.getunleash.io/reference/unleash-edge/migration-guide).
 
 ## Requirements
 
 - MacOS: 12.15
 - iOS: 12
 
-## Upgrade guide from 1.x -> 2.x
-In 2.0.0 the StorageProvider public interface [was changed](https://github.com/Unleash/unleash-proxy-client-swift/pull/113) to be more in line with other SDKs. Specifically the set method was changed to accept all flags at once. It now has the following interface: 
-```
-func set(values: [String: Toggle])
-```
-
-If you are running with your own StorageProvider implementation you'll need to make changes to your implementation.
-
-## Installation
-
-Follow the following steps in order to install the unleash-proxy-client-swift:
-
-1. In your Xcode project go to File -> Swift Packages -> Add Package Dependency
-2. Supply the link to this repository
-3. Set the appropriate package constraints (typically up to next major version)
-4. Let Xcode find and install the necessary packages
-
-Once you're done, you should see SwiftEventBus and UnleashProxyClientSwift listed as dependencies in the file explorer of your project.
-
 ## Usage
 
-In order to get started you need to import and instantiate the unleash client:
+To get started, import the SDK and initialize the Unleash client:
 
 ### iOS >= 13
 
@@ -72,17 +62,17 @@ unleash.start()
 
 In the example above we import the UnleashProxyClientSwift and instantiate the client. You need to provide the following parameters:
 
-- `unleashUrl`: the full url to either the [Unleash front-end API](https://docs.getunleash.io/reference/front-end-api) OR an [Unleash proxy](https://docs.getunleash.io/reference/unleash-proxy) [String]
-- `clientKey`: either an [client-side API token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) if you use the front-end API ([how](https://docs.getunleash.io/how-to/how-to-create-api-tokens 'how do I create API tokens?')) or a [proxy client key](https://docs.getunleash.io/reference/api-tokens-and-client-keys#proxy-client-keys) if you use the proxy [String]
-- `refreshInterval`: the polling interval in seconds [Int]. Set to `0`to only poll once and disable a periodic polling
-- `appName`: the application name identifier [String]
-- `context`: the context parameters except from `appName` and `environment` which should be specified explicitly in the init [[String: String]]
+- `unleashUrl`: The full URL to either the [Unleash Frontend API](https://docs.getunleash.io/reference/front-end-api) or an [Unleash Edge instance](https://docs.getunleash.io/reference/unleash-edge) [String]
+- `clientKey`: A [frontend API tokens](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens) for authenticating with the Frontend API or Unleash Edge [String]
+- `refreshInterval`: The polling interval in seconds, set to `0` to only poll once and disable a periodic polling [Int]
+- `appName`: The application name identifier [String]
+- `context`: Initial Unleash Context fields (like `userId`, `sessionId`, etc.), excluding `appName` and `environment` which are configured separately. [[String: String]]
 
-Running `unleash.start()` will make the first request against the proxy and retrieve the feature toggle configuration, and set up the polling interval in the background.
+Calling `unleash.start()` makes the initial request to retrieve the feature flag configuration and starts the background polling interval (if `refreshInterval > 0`).
 
-NOTE: While waiting to boot up the configuration may not be available, which means that asking for a feature toggle may result in a false if the configuration has not loaded. In the event that you need to be certain that the configuration is loaded we emit an event you can subscribe to, once the configuration is loaded. See more in the Events section.
+> NOTE: Until the client fetches the initial configuration (signaled by the `ready` event), checking a feature flag might return the default value (often `false`). To ensure the configuration is loaded before checking flags, subscribe to the ready event. See the [Events](#events) section for details.
 
-Once the configuration is loaded you can ask against the cache for a given feature toggle:
+Once the configuration is loaded, you can check if a feature flag is enabled:
 
 ```swift
 if unleash.isEnabled(name: "ios") {
@@ -92,7 +82,7 @@ if unleash.isEnabled(name: "ios") {
 }
 ```
 
-You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants) and use them in a similar fashion:
+You can also set up [variants](https://docs.getunleash.io/docs/advanced/toggle_variants):
 
 ```swift
 var variant = unleash.getVariant(name: "ios")
@@ -105,26 +95,26 @@ if variant.enabled {
 
 ### Available options
 
-The Unleash SDK takes the following options:
+The Unleash SDK accepts the following initialization options:
 
 | option                | required | default                        | description                                                                                                                                                                                                                                               |
 |-----------------------|----------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| unleashUrl            | yes      | n/a                            | The Unleash Edge/Proxy URL to connect to. E.g.: `https://examples.com/proxy`                                                                                                                                                                              |
-| clientKey             | yes      | n/a                            | The Unleash Edge/Proxy Secret to be used                                                                                                                                                                                                                  |
-| appName               | no       | unleash-swift-client           | The name of the application using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context.                                                                                                     |
-| environment           | no       | default                        | The name of the environment using this SDK. Will be used as part of the metrics sent to Unleash Edge/Proxy. Will also be part of the Unleash Context.                                                                                                     |
-| refreshInterval       | no       | 15                             | How often, in seconds, the SDK should check for updated toggle configuration. If set to 0 will disable checking for updates                                                                                                                               |
-| metricsInterval       | no       | 30                             | How often, in seconds, the SDK should send usage metrics back to Unleash Edge/Proxy                                                                                                                                                                       |
-| disableMetrics        | no       | false                          | Set this option to `true` if you want to disable usage metrics                                                                                                                                                                                            |
-| context               | no       | [:]                            | The initial context parameters except from `appName` and `environment which are specified as top level fields                                                                                                                                             |
-| poller                | no       | nil                            | A custom poller instance that handles fetching and caching feature toggle configurations. If nil, a default Poller will be created with the client's settings. Useful when you need more control over the polling behavior or want to provide a mock for testing. If provided, `refreshInterval`, `customHeaders`, `customHeadersProvider` and `bootstrap` options on the client will be ignored.  |
-| pollerSession         | no       | `URLSession.shared`            | Session object used for performing HTTP requests. You can provide a custom PollerSession for custom URLSession configuration or URLRequest interception.             |
-| customHeaders         | no       | `[:]`                          | Additional headers to use when making HTTP requests to the Unleash Edge/Proxy. In case of name collisions with the default headers, the `customHeaders` value will be used.                                                                               |
+| unleashUrl            | yes      | n/a                            | The Unleash Edge URL to connect to.                                                                                                                                                                              |
+| clientKey             | yes      | n/a                            | The frontend token to use for authenticating with the Frontend API or Unleash Edge.                                                                                                                                                                                                                  |
+| appName               | no       | unleash-swift-client           | The name of the application using this SDK. Sent with metrics to Unleash Edge and included in the Unleash Context.                                                                                                     |
+| environment           | no       | default                        | The name of the environment. Sent with metrics to Unleash Edge and included in the Unleash Context.                                                                                                     |
+| refreshInterval       | no       | 15                             | How often (in seconds) the SDK checks for updated flag configurations. Set to 0 to disable polling after initial fetch.                                                                                                                               |
+| metricsInterval       | no       | 30                             | How often (in seconds) the SDK sends usage metrics back to Unleash Edge. |                                                                                                       |
+| disableMetrics        | no       | false                          | Set this to `true` to disable usage metrics.                                                                                                                                                                                            |
+| context               | no       | [:]                            | The initial context parameters excluding `appName` and `environment` which are specified as top level fields.                                                                                                                                             |
+| poller                | no       | nil                            | A custom poller instance. If provided, the client ignores its own `refreshInterval`, `customHeaders`, `customHeadersProvider`, and `bootstrap` options. Use for advanced control or mocking.  |
+| pollerSession         | no       | `URLSession.shared`            | Session object used for performing HTTP requests. You can provide a custom `PollerSession` for custom `URLSession` configuration or `URLRequest` interception.             |
+| customHeaders         | no       | `[:]`                          | Additional headers to use when making HTTP requests to Unleash Edge. In case of name collisions with the default headers, the `customHeaders` value will be used.                                                                               |
 | customHeadersProvider | no       | `DefaultCustomHeadersProvider` | Custom header provider for additional headers. In case of name collisions with the `customHeaders`, the `customHeadersProvider` value will be used.                                                                                                       |
-| bootstrap             | no       | empty list of toggles          | The Unleash Edge/Proxy SDK can be initialised with an initial set of toggles, read from either a list of Toggles, or a jsonFile matching the structure of the response from the frontend API. These will be available instantly before the initial fetch. |
+| bootstrap             | no       | empty list of toggles          | Initial flag configurations provided to the Unleash client SDK. Can be a list of `Toggle` objects or the path to a JSON file matching the front-end API response format. Available immediately on init, before the first fetch. |
 
 ### Bootstrapping
-You can provide the initial toggle state to the Unleash client SDK. This is useful when you have a known initial state for your feature toggles. This toggle state can be bootstrapped to the client via a list of toggles, or from a file matching a response from the [frontend API](https://docs.getunleash.io/reference/front-end-api). For example:
+You can provide the initial toggle state to the Unleash client SDK. This is useful when you have a known initial state for your feature toggles. This toggle state can be bootstrapped to the client via a list of toggles, or from a file matching a response from the [Frontend API](https://docs.getunleash.io/reference/front-end-api). For example:
 
 #### Bootstrap from hard-coded list
 ```swift
@@ -147,7 +137,7 @@ let bootstrapList = Bootstrap
     )
 ```
 
-#### Bootstrap from file matching frontend API response
+#### Bootstrap from file matching Frontend API response
 ```json    
 {
   "toggles": [
@@ -186,11 +176,11 @@ guard let filePath = Bundle.main.path(forResource: "FeatureResponseFile", ofType
     // Handle missing file
 }
 
-let boostrapFile = Bootsrap.jsonFile(path: filePath)
+let boostrapFile = Bootstrap.jsonFile(path: filePath)
 ```
 
 #### Using the bootstrap list of toggles
-Whether from a hard-coded list, or a json file, the boostrap toggles can be injected into the Unleash Edge/proxy client either at initialisation time, or when calling start. For example:
+Whether from a hard-coded list, or a json file, the bootstrap toggles can be injected into the Unleash Edge or Proxy client either at initialisation time, or when calling start. For example:
 
 ```swift
 import SwiftUI
@@ -215,14 +205,14 @@ await unleash.start(bootstrap: .jsonFile("path/to/json/file"))
 ```
 
 #### Important notices
-- If you initialise the Unleash Edge/proxy client with a Poller, you should inject the bootstrap directly into the poller. **Any bootstrapped toggles inject into the Unleash client will be ignored when a poller is also injected.**
-- Any bootstrapped toggles will be removed after the first initial fetch
-- If bootstrap toggles are provided when calling start, the first fetch will be at the next refresh interval specified (default 15 seconds)
-- Calling `updateContext(...)` before the first fetch will remove bootstrapped toggles.
+- If you initialise the Unleash Edge client with a `Poller`, inject the bootstrap directly into the poller. **Any bootstrap data injected into the Unleash client options will be ignored when a custom poller is also provided.**
+- Bootstrapped flag configurations are replaced entirely after the first successful fetch.
+- If bootstrap flags are provided when calling start, the first fetch occurs after the configured `refreshInterval` (default 15 seconds).
+- Calling `updateContext(...)` before the first fetch removes any bootstrapped flags.
 
 ### Update context
 
-In order to update the context you can use the following method:
+To update the context, use the following method:
 
 ```swift
 var context: [String: String] = [:]
@@ -256,7 +246,7 @@ class CustomPollerSession: PollerSession {
         // Modify URLRequest if needed
         var modifiedRequest = request
         modifiedRequest.setValue("foo", forHTTPHeaderField: "bar")
-        
+
         let session = URLSession(configuration: configuration)
         session.dataTask(with: modifiedRequest, completionHandler: completionHandler).resume()
     }
@@ -271,8 +261,8 @@ var unleash = UnleashProxyClientSwift.UnleashClient(
 ```
 
 ### Custom HTTP headers
-If you want the client to send custom HTTP Headers with all requests to the Unleash API
-you can define that by setting them via the `UnleashClientBase`.
+
+If you want the client to send custom HTTP headers with all requests to the Unleash API you can define that by setting them via the `UnleashClientBase`.
 
 Custom and dynamic custom headers does not apply to sensitive headers.
 - `Content-Type`
@@ -291,7 +281,7 @@ var unleash = UnleashProxyClientSwift.UnleashClientBase(
 ```
 
 ### Dynamic custom HTTP headers
-If you need custom http headers that change during the lifetime of the client, a provider can be defined via the `UnleashClientBase`.
+If you need custom HTTP headers that change during the lifetime of the client, a provider can be defined via the `UnleashClientBase`.
 
 ```swift
 public class MyCustomHeadersProvider: CustomHeadersProvider {
@@ -317,14 +307,16 @@ var unleash = UnleashProxyClientSwift.UnleashClientBase(
 
 ## Events
 
-The proxy client emits events that you can subscribe to. The following events are available:
+The client emits events that you can subscribe to using the `subscribe(name:callback:)` method or the `UnleashEvent` enum.
 
-- "ready"
-- "update"
-- "sent" (metrics sent)
-- "error" (metrics sending error)
+### Standard events
 
-Usage them in the following manner:
+- `ready` (`UnleashEvent.ready`): Emitted once the client has successfully fetched and cached the initial feature flag configurations.
+- `update` (`UnleashEvent.update`): Emitted when a subsequent fetch results in a change to the feature flag configurations.
+- `sent` (`UnleashEvent.sent`): Emitted when usage metrics have been successfully sent to the server.
+- `error` (`UnleashEvent.error`): Emitted if an error occurs when trying to send metrics.
+
+### Subscribing to standard events
 
 ```swift
 func handleReady() {
@@ -340,37 +332,63 @@ func handleUpdate() {
 unleash.subscribe(name: "update", callback: handleUpdate)
 ```
 
-Alternatively these are discoverable and usable as a typed enum `UnleashEvent` like so:
+Alternatively you can use the enum `UnleashEvent`, for example:
 
 ```swift
 unleash.subscribe(.ready, callback: handleUpdate)
 ```
 
-The ready event is fired once the client has received it's first set of feature toggles and cached it in memory. Every subsequent event will be an update event that is triggered if there is a change in the feature toggle configuration.
+### Impression data events
+
+This SDK allows you to subscribe to [Impression Data](https://docs.getunleash.io/reference/impression-data) events. These events provide granular, real-time tracking of feature exposures. You must specifically [enable impression data](https://docs.getunleash.io/reference/impression-data#enabling-impression-data) for the feature flags you'd like to track.
+
+When `isEnabled(name:)` or `getVariant(name:)` is called for a feature flag that has impression data enabled, the SDK creates an `ImpressionEvent` object that is broadcast internally using the event name `impression` (also accessible via the `UnleashEvent.impression` enum case).
+
+### Subscribing to impression data events
+
+```swift
+import UnleashProxyClientSwift
+
+// Define your handler that accepts the raw payload and casts to ImpressionEvent
+func handleImpressionEvent(_ payload: Any?) {
+    guard let impressionEvent = payload as? UnleashProxyClientSwift.ImpressionEvent else {
+        // Optional: Log a warning if casting fails
+        return
+    }
+
+    // Additional logic to send impression data to your analytics tool
+}
+
+// Subscribe to the impression event, providing the handler function
+unleash.subscribe(.impression, callback: handleImpressionEvent)
+
+// Or: unleash.subscribe(name: "impression", callback: handleImpressionEvent)
+
+```
 
 ## Releasing
 
 Note: To release the package you'll need to have [CocoaPods](https://cocoapods.org/) installed.
 
-Update `Sources/Version/Version.swift` with the new version number. It will be used in `unleash-sdk` header as a version reported to Unleash server.
+Update `Sources/Version/Version.swift` with the new version number. This version is used in `unleash-sdk` header as a version reported to Unleash server.
 
-Then, you'll need to add a tag with the same version number as the previous step. Releasing the tag is enough for the Swift package manager, but it's polite to also ensure CocoaPods users can also consume the code.
+Then, add a Git tag macthing the version number. Releasing the tag is sufficient for the Swift package manager, but you might also want to ensure CocoaPods users can also consume the code.
 
 ```sh
 git tag -a 0.0.4 -m "v0.0.4"
 ```
 
-Please make sure that that tag is pushed to remote.
+Please make sure that the tag is pushed to remote.
 
 The next few commands assume that you have CocoaPods installed and available on your shell.
 
-First, validate your session with cocoapods with the following command:
+First, validate your session with CocoaPods with the following command:
 
 ```sh
 pod trunk register <email> "Your name"
 ```
 
-The email that owns this package is the general unleash team email. Cocoapods will send a link to this email, click it to validate your shell session.
+The email that owns this package is the general Unleash team email. Cocoapods will send a link to this email, click it to validate your shell session.
 
 Bump the version number of the package, you can find this in `UnleashProxyClientSwift.podspec`, we use SemVer for this project. Once that's committed and merged to main:
 
@@ -388,10 +406,30 @@ pod trunk push UnleashProxyClientSwift.podspec --allow-warnings
 
 ## Testing
 
-In order to test this package you can run the swift test command. To test thread safety, run swift test with:
+In order to test this package you can run the `swift test` command. To test thread safety, run `swift test` with:
 
 ```
 swift test --sanitize=thread
 ```
 
-This will give you warnings in the console when you have any data races.
+This gives you warnings in the console when you have any data races.
+
+## Installation
+
+Follow the following steps in order to install the unleash-proxy-client-swift:
+
+1. In your Xcode project go to File -> Swift Packages -> Add Package Dependency
+2. Supply the link to this repository
+3. Set the appropriate package constraints (typically up to next major version)
+4. Let Xcode find and install the necessary packages
+
+Once you're done, you should see SwiftEventBus and UnleashProxyClientSwift listed as dependencies in the file explorer of your project.
+
+
+## Upgrade guide from 1.x -> 2.x
+In 2.0.0 the StorageProvider public interface [was changed](https://github.com/Unleash/unleash-proxy-client-swift/pull/113) to be more in line with other SDKs. Specifically the set method was changed to accept all flags at once. It now has the following interface: 
+```
+func set(values: [String: Toggle])
+```
+
+If you are running with your own StorageProvider implementation you'll need to make changes to your implementation.
