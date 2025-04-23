@@ -64,7 +64,7 @@ public class UnleashClientBase {
         
         self.context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0..<1_000_000_000)))
         if let providedContext = context {
-           self.context = self.calculateContext(context: providedContext)
+            self.context = self.calculateContext(context: providedContext)
         }
     }
 
