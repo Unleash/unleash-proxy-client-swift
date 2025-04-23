@@ -63,9 +63,8 @@ public class UnleashClientBase {
         }
         
         self.context = Context(appName: appName, environment: environment)
-        if let providedContext = context {
-            self.context = self.calculateContext(context: providedContext)
-        }
+        let providedContext = context ?? [:]
+        self.context = self.calculateContext(context: providedContext)
     }
 
     public func start(
@@ -192,12 +191,14 @@ public class UnleashClientBase {
         properties?.forEach { (key, value) in
             newProperties[key] = value
         }
+
+        let sessionId = context["sessionId"] ?? String(Int.random(in: 0..<1_000_000_000))
         
         let newContext = Context(
             appName: self.context.appName,
             environment: self.context.environment,
             userId: context["userId"],
-            sessionId: context["sessionId"],
+            sessionId: sessionId,
             remoteAddress: context["remoteAddress"],
             properties: newProperties
         )
