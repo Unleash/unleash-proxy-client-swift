@@ -12,7 +12,7 @@ class UnleashIntegrationTests: XCTestCase {
             clientKey: "SDKIntegration:development.f0474f4a37e60794ee8fb00a4c112de58befde962af6d5055b383ea3",
             refreshInterval: 15,
             appName: "testIntegration",
-            context: ["clientId": "disabled"]
+            context: ["clientId": "disabled", "sessionId": "1234"]
         )
     }
 
@@ -23,7 +23,7 @@ class UnleashIntegrationTests: XCTestCase {
     func testUserJourneyHappyPath() {
         let expectation = self.expectation(description: "Waiting for client updates")
         
-        XCTAssertEqual(unleashClient.context.toMap(), ["environment": "default", "clientId": "disabled", "appName": "testIntegration"])
+        XCTAssertEqual(unleashClient.context.toMap(), ["environment": "default", "clientId": "disabled", "appName": "testIntegration", "sessionId": "1234"])
 
         unleashClient.subscribe(name: "ready", callback: {
             XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")
@@ -59,7 +59,7 @@ class UnleashIntegrationTests: XCTestCase {
     func testUserJourneyHappyPathWithUnleashEvent() {
         let expectation = self.expectation(description: "Waiting for client updates")
         
-        XCTAssertEqual(unleashClient.context.toMap(), ["environment": "default", "clientId": "disabled", "appName": "testIntegration"])
+        XCTAssertEqual(unleashClient.context.toMap(), ["environment": "default", "clientId": "disabled", "appName": "testIntegration", "sessionId": "1234"])
 
         unleashClient.subscribe(.ready) {
             XCTAssertFalse(self.unleashClient.isEnabled(name: self.featureName), "Feature should be disabled")

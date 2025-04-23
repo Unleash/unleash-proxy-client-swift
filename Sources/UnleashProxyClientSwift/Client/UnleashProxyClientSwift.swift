@@ -62,7 +62,7 @@ public class UnleashClientBase {
             self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId)
         }
         
-        self.context = Context(appName: appName, environment: environment)
+        self.context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0..<1_000_000_000)))
         if let providedContext = context {
             self.context = self.calculateContext(context: providedContext)
         }
@@ -192,12 +192,14 @@ public class UnleashClientBase {
         properties?.forEach { (key, value) in
             newProperties[key] = value
         }
+
+        let sessionId = context["sessionId"] ?? self.context.sessionId;
         
         let newContext = Context(
             appName: self.context.appName,
             environment: self.context.environment,
             userId: context["userId"],
-            sessionId: context["sessionId"],
+            sessionId: sessionId,
             remoteAddress: context["remoteAddress"],
             properties: newProperties
         )
