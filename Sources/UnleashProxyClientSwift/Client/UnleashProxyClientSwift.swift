@@ -62,9 +62,10 @@ public class UnleashClientBase {
             self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId)
         }
         
-        self.context = Context(appName: appName, environment: environment)
-        let providedContext = context ?? [:]
-        self.context = self.calculateContext(context: providedContext)
+        self.context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0..<1_000_000_000)))
+          if let providedContext = context {
+            self.context = self.calculateContext(context: providedContext)
+          }
     }
 
     public func start(
@@ -192,7 +193,7 @@ public class UnleashClientBase {
             newProperties[key] = value
         }
 
-        let sessionId = context["sessionId"] ?? String(Int.random(in: 0..<1_000_000_000))
+        let sessionId = context["sessionId"] ?? self.context.sessionId;
         
         let newContext = Context(
             appName: self.context.appName,
