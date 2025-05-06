@@ -395,13 +395,13 @@ Bump the version number of the package, you can find this in `UnleashProxyClient
 Linting the podspec is always a good idea:
 
 ```sh
-pod spec lint UnleashProxyClientSwift.podspec
+pod spec lint UnleashProxyClientSwift.podspec --use-libraries
 ```
 
 Once that succeeds, you can do the actual release:
 
 ```sh
-pod trunk push UnleashProxyClientSwift.podspec --allow-warnings
+pod trunk push UnleashProxyClientSwift.podspec --allow-warnings --use-libraries
 ```
 
 ## Testing
