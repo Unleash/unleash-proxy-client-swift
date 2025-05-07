@@ -7,7 +7,7 @@ You can use this client with [Unleash Enterprise](https://www.getunleash.io/pric
 You can connect the SDK to Unleash in two ways:
 
 - **Directly** to your Unleash instance using the [Frontend API](https://docs.getunleash.io/reference/front-end-api).
-- **Using Unleash Edge**, a lightweight service acting as a caching and evaluation layer between the SDK and your main Unleash instance. [Unleash Edge](https://docs.getunleash.io/reference/unleash-edgefetches flag configurations, caches them in-memory, and handles evaluation locally for faster responses and high availability.
+- **Using Unleash Edge**, a lightweight service acting as a caching and evaluation layer between the SDK and your main Unleash instance. [Unleash Edge](https://docs.getunleash.io/reference/unleash-edgefetches) flag configurations, caches them in-memory, and handles evaluation locally for faster responses and high availability.
 
 In both setups, the SDK retrieves feature flag configurations for the provided [context](https://docs.getunleash.io/docs/user_guide/unleash_context). The SDK caches the received flag configurations in memory and refreshes them periodically (at a configurable interval). This makes local evaluations like `isEnabled()` extremely fast.
 
