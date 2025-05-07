@@ -221,4 +221,13 @@ final class unleash_proxy_client_base_swiftTests: XCTestCase {
         XCTAssert(url.contains("properties%5BcustomContextKeyWorksButPreferProperties%5D=someValue"), url)
         XCTAssert(url.contains("properties%5Bcustom%2BKey%5D=custom%2BValue"), url)
     }
+
+    func testConnectionId() {
+        func dataGenerator() -> [String: UnleashProxyClientSwift.Toggle] {
+            return generateTestToggleMapWithVariant()
+        }
+
+        let unleash = setupBase(dataGenerator: dataGenerator)
+        XCTAssertEqual(unleash.connectionId, unleash.poller.connectionId)
+    }
 }
