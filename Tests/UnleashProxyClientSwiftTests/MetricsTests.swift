@@ -94,6 +94,68 @@ final class MetricsTests: XCTestCase {
         wait(for: [metricsSentError], timeout: 2)
     }
 
+    func testSendsSdkFlavorHeaderWhenSet() throws {
+        let metricsSent = expectation(description: "Metrics sent")
+        SwiftEventBus.onBackgroundThread(self, name: "sent") { _ in
+            metricsSent.fulfill()
+        }
+
+        var recordedFlavor: String?
+        var recordedFlavorVersion: String?
+        let poster: Metrics.PosterHandler = { request, completionHandler in
+            recordedFlavor = request.value(forHTTPHeaderField: "sdkFlavor")
+            recordedFlavorVersion = request.value(forHTTPHeaderField: "sdkFlavorVersion")
+            let response = HTTPURLResponse(url: URL(string: "https://unleashapi.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
+            completionHandler(.success((Data(), response!)))
+        }
+
+        let metrics = Metrics(appName: "TestApp",
+                metricsInterval: 1,
+                clock: { Date() },
+                poster: poster,
+                url: URL(string: "https://unleashinstance.com")!,
+                clientKey: "testKey",
+                connectionId: UUID(),
+                sdkFlavor: "unleash-openfeature-swift-provider:1.0.0",
+                sdkFlavorVersion: "1.0.0"
+                )
+        metrics.start()
+        metrics.count(name: "testToggle", enabled: true)
+
+        wait(for: [metricsSent], timeout: 2)
+
+        XCTAssertEqual(recordedFlavor, "unleash-openfeature-swift-provider:1.0.0")
+        XCTAssertEqual(recordedFlavorVersion, "1.0.0")
+    }
+
+    func testOmitsSdkFlavorHeaderWhenUnset() throws {
+        let metricsSent = expectation(description: "Metrics sent")
+        SwiftEventBus.onBackgroundThread(self, name: "sent") { _ in
+            metricsSent.fulfill()
+        }
+
+        var flavorHeaderPresent = true
+        let poster: Metrics.PosterHandler = { request, completionHandler in
+            flavorHeaderPresent = request.value(forHTTPHeaderField: "unleash-sdk-flavor") != nil
+            let response = HTTPURLResponse(url: URL(string: "https://unleashapi.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
+            completionHandler(.success((Data(), response!)))
+        }
+
+        let metrics = Metrics(appName: "TestApp",
+                metricsInterval: 1,
+                clock: { Date() },
+                poster: poster,
+                url: URL(string: "https://unleashinstance.com")!,
+                clientKey: "testKey",
+                connectionId: UUID())
+        metrics.start()
+        metrics.count(name: "testToggle", enabled: true)
+
+        wait(for: [metricsSent], timeout: 2)
+
+        XCTAssertFalse(flavorHeaderPresent)
+    }
+
     func testDisabledMetrics() throws {
         let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
 

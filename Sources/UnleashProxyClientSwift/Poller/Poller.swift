@@ -15,6 +15,8 @@ public class Poller {
     var storageProvider: StorageProvider
     let customHeaders: [String: String]
     let customHeadersProvider: CustomHeadersProvider
+    let sdkFlavor: String?
+    let sdkFlavorVersion: String?
 
     private let lock = NSLock()
 
@@ -28,7 +30,9 @@ public class Poller {
         customHeadersProvider: CustomHeadersProvider = DefaultCustomHeadersProvider(),
         bootstrap: Bootstrap = .toggles([]),
         appName: String,
-        connectionId: UUID
+        connectionId: UUID,
+        sdkFlavor: String? = nil,
+        sdkFlavorVersion: String? = nil
     ) {
         self.refreshInterval = refreshInterval
         self.unleashUrl = unleashUrl
@@ -42,6 +46,8 @@ public class Poller {
         self.storageProvider = storageProvider
         self.customHeaders = customHeaders
         self.customHeadersProvider = customHeadersProvider
+        self.sdkFlavor = sdkFlavor
+        self.sdkFlavorVersion = sdkFlavorVersion
 
         let toggles = bootstrap.toggles
         if toggles.isEmpty == false {
@@ -145,6 +151,10 @@ public class Poller {
         request.setValue(appName, forHTTPHeaderField: "unleash-appname")
         request.setValue(connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
         request.setValue("unleash-ios-sdk:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
+        if let sdkFlavor {
+            request.setValue(sdkFlavor, forHTTPHeaderField: "unleash-ios-sdk-flavor")
+            request.setValue(sdkFlavorVersion, forHTTPHeaderField: LibraryInfo.version)
+        }
 
         let customHeaders = self.customHeaders.merging(self.customHeadersProvider.getCustomHeaders()) { (_, new) in
             new
