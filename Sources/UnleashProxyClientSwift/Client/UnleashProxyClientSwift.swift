@@ -6,18 +6,19 @@ public class UnleashClientBase {
     private var _context: Context
 
     public var context: Context {
-            get {
-                lock.lock()
-                let value = self._context
-                lock.unlock()
-                return value
-            }
-            set {
-                lock.lock()
-                self._context = newValue
-                lock.unlock()
-            }
+        get {
+            lock.lock()
+            let value = _context
+            lock.unlock()
+            return value
         }
+        set {
+            lock.lock()
+            _context = newValue
+            lock.unlock()
+        }
+    }
+
     var timer: DispatchSourceTimer?
     var poller: Poller
     var metrics: Metrics
@@ -44,8 +45,8 @@ public class UnleashClientBase {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
         }
 
-        self.connectionId = UUID()
-        self.timer = nil
+        connectionId = UUID()
+        timer = nil
         if let poller = poller {
             self.poller = poller
         } else {
@@ -65,7 +66,7 @@ public class UnleashClientBase {
             self.metrics = metrics
         } else {
             let urlSessionPoster: Metrics.PosterHandler = { request, completionHandler in
-                let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+                let task = URLSession.shared.dataTask(with: request) { data, response, error in
                     if let error = error {
                         completionHandler(.failure(error))
                     } else if let data = data, let response = response {
@@ -74,12 +75,12 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId)
         }
 
-        self._context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0..<1_000_000_000)))
+        _context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0 ..< 1_000_000_000)))
         if let providedContext = context {
-            self._context = self.calculateContext(context: providedContext)
+            _context = calculateContext(context: providedContext)
         }
     }
 
@@ -87,9 +88,9 @@ public class UnleashClientBase {
         bootstrap: Bootstrap = .toggles([]),
         _ printToConsole: Bool = false,
         completionHandler: ((PollerError?) -> Void)? = nil
-    ) -> Void {
+    ) {
         Printer.showPrintStatements = printToConsole
-        self.stopPolling()
+        stopPolling()
         poller.start(
             bootstrapping: bootstrap.toggles,
             context: context,
@@ -98,13 +99,13 @@ public class UnleashClientBase {
         metrics.start()
     }
 
-    private func stopPolling() -> Void {
+    private func stopPolling() {
         poller.stop()
         metrics.stop()
     }
 
-    public func stop() -> Void {
-        self.stopPolling()
+    public func stop() {
+        stopPolling()
         lock.lock()
         timer?.cancel()
         timer = nil
@@ -115,7 +116,7 @@ public class UnleashClientBase {
     public func isEnabled(name: String) -> Bool {
         let toggle = poller.getFeature(name: name)
         let enabled = toggle?.enabled ?? false
-        let contextSnapshot = self.context
+        let contextSnapshot = context
 
         metrics.count(name: name, enabled: enabled)
 
@@ -136,7 +137,7 @@ public class UnleashClientBase {
         let toggle = poller.getFeature(name: name)
         let variant = toggle?.variant ?? .defaultDisabled
         let enabled = toggle?.enabled ?? false
-        let contextSnapshot = self.context
+        let contextSnapshot = context
 
         metrics.count(name: name, enabled: enabled)
         metrics.countVariant(name: name, variant: variant.name)
@@ -158,12 +159,12 @@ public class UnleashClientBase {
     public func subscribe(name: String, callback: @escaping () -> Void) {
         if Thread.isMainThread {
             print("Subscribing to \(name) on main thread")
-            SwiftEventBus.onMainThread(self, name: name) { result in
+            SwiftEventBus.onMainThread(self, name: name) { _ in
                 callback()
             }
         } else {
             print("Subscribing to \(name) on background thread")
-            SwiftEventBus.onBackgroundThread(self, name: name) { result in
+            SwiftEventBus.onBackgroundThread(self, name: name) { _ in
                 callback()
             }
         }
@@ -204,7 +205,7 @@ public class UnleashClientBase {
         properties: [String: String]? = nil,
         completionHandler: ((PollerError?) -> Void)? = nil
     ) {
-        let newContext = self.calculateContext(context: context, properties: properties)
+        let newContext = calculateContext(context: context, properties: properties)
         self.context = newContext
 
         DispatchQueue.global(qos: .background).async {
@@ -212,25 +213,25 @@ public class UnleashClientBase {
         }
     }
 
-    func calculateContext(context: [String: String], properties: [String:String]? = nil) -> Context {
+    func calculateContext(context: [String: String], properties: [String: String]? = nil) -> Context {
         let specialKeys: Set = ["appName", "environment", "userId", "sessionId", "remoteAddress"]
         var newProperties: [String: String] = [:]
 
-        context.forEach { (key, value) in
+        for (key, value) in context {
             if !specialKeys.contains(key) {
                 newProperties[key] = value
             }
         }
 
-        properties?.forEach { (key, value) in
+        properties?.forEach { key, value in
             newProperties[key] = value
         }
 
         let currentContext = self.context
 
-        let sessionId = context["sessionId"] ?? currentContext.sessionId;
+        let sessionId = context["sessionId"] ?? currentContext.sessionId
 
-        let newContext = Context(
+        return Context(
             appName: currentContext.appName,
             environment: currentContext.environment,
             userId: context["userId"],
@@ -238,8 +239,6 @@ public class UnleashClientBase {
             remoteAddress: context["remoteAddress"],
             properties: newProperties
         )
-
-        return newContext
     }
 }
 
@@ -264,7 +263,7 @@ public class UnleashClient: UnleashClientBase, ObservableObject {
     @MainActor
     public func updateContext(
         context: [String: String],
-        properties: [String:String]? = nil
+        properties: [String: String]? = nil
     ) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             updateContext(context: context, properties: properties) { error in

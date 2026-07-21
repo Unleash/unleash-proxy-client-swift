@@ -5,7 +5,7 @@ public struct Context {
     var sessionId: String?
     var remoteAddress: String?
     var properties: [String: String]?
-    
+
     init(
         appName: String? = nil,
         environment: String? = nil,
@@ -21,49 +21,49 @@ public struct Context {
         self.remoteAddress = remoteAddress
         self.properties = properties
     }
-    
+
     public func toMap() -> [String: String] {
         var params: [String: String] = [:]
-        properties?.forEach { (key, value) in
+        properties?.forEach { key, value in
             params[key] = value
         }
-        if let userId = self.userId {
+        if let userId = userId {
             params["userId"] = userId
         }
-        if let remoteAddress = self.remoteAddress {
+        if let remoteAddress = remoteAddress {
             params["remoteAddress"] = remoteAddress
         }
-        if let sessionId = self.sessionId {
+        if let sessionId = sessionId {
             params["sessionId"] = sessionId
         }
-        if let appName = self.appName {
+        if let appName = appName {
             params["appName"] = appName
         }
-        if let environment = self.environment {
+        if let environment = environment {
             params["environment"] = environment
         }
-        
+
         return params
     }
-    
+
     func toURIMap() -> [String: String] {
         var params: [String: String] = [:]
-        if let userId = self.userId {
+        if let userId = userId {
             params["userId"] = userId
         }
-        if let remoteAddress = self.remoteAddress {
+        if let remoteAddress = remoteAddress {
             params["remoteAddress"] = remoteAddress
         }
-        if let sessionId = self.sessionId {
+        if let sessionId = sessionId {
             params["sessionId"] = sessionId
         }
-        if let appName = self.appName {
+        if let appName = appName {
             params["appName"] = appName
         }
-        if let environment = self.environment {
+        if let environment = environment {
             params["environment"] = environment
         }
-        properties?.forEach { (key, value) in
+        properties?.forEach { key, value in
             params["properties[\(key)]"] = value
         }
         return params

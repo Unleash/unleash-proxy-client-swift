@@ -8,20 +8,20 @@ public class DictionaryStorageProvider: StorageProvider {
 
     public func set(values: [String: Toggle]) {
         lock.lock()
-        self.storage = values
+        storage = values
         lock.unlock()
     }
 
     public func value(key: String) -> Toggle? {
         lock.lock()
-        let result = self.storage[key]
+        let result = storage[key]
         lock.unlock()
         return result
     }
 
     public func clear() {
         lock.lock()
-        self.storage = [:]
+        storage = [:]
         lock.unlock()
     }
 }

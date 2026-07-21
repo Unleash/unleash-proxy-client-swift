@@ -1,10 +1,11 @@
 // MARK: - Toggle
+
 public struct Toggle: Codable, Equatable {
     public let name: String
     public let enabled: Bool
     public let impressionData: Bool
     public let variant: Variant?
-    
+
     public init(
         name: String,
         enabled: Bool,
@@ -16,14 +17,14 @@ public struct Toggle: Codable, Equatable {
         self.impressionData = impressionData
         self.variant = variant
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case name
         case enabled
         case impressionData
         case variant
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)

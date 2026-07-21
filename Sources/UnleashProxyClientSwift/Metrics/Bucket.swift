@@ -24,7 +24,7 @@ struct Bucket {
         return [
             "start": start.iso8601String(),
             "stop": stop?.iso8601String() ?? "",
-            "toggles": mappedToggles
+            "toggles": mappedToggles,
         ]
     }
 }

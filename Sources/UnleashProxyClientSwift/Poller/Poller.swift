@@ -6,10 +6,10 @@ public class Poller {
     var unleashUrl: URL
     var timer: DispatchSourceTimer?
     var ready: Bool
-    var apiKey: String;
-    var etag: String;
-    var appName: String;
-    var connectionId: UUID;
+    var apiKey: String
+    var etag: String
+    var appName: String
+    var connectionId: UUID
 
     private let session: PollerSession
     var storageProvider: StorageProvider
@@ -35,9 +35,9 @@ public class Poller {
         self.apiKey = apiKey
         self.appName = appName
         self.connectionId = connectionId
-        self.timer = nil
-        self.ready = false
-        self.etag = ""
+        timer = nil
+        ready = false
+        etag = ""
         self.session = session
         self.storageProvider = storageProvider
         self.customHeaders = customHeaders
@@ -55,14 +55,14 @@ public class Poller {
         completionHandler: ((PollerError?) -> Void)? = nil
     ) {
         if toggles.isEmpty {
-            self.getFeatures(context: context, completionHandler: completionHandler)
+            getFeatures(context: context, completionHandler: completionHandler)
         } else {
             Printer.printMessage("Starting with provided bootstrap toggles")
             createFeatureMap(toggles: toggles)
             completionHandler?(nil)
         }
 
-        let refreshIntervalValue = self.refreshInterval
+        let refreshIntervalValue = refreshInterval
 
         if refreshIntervalValue == 0 {
             return
@@ -85,20 +85,21 @@ public class Poller {
 
     public func stop() {
         lock.lock()
-        self.timer?.cancel()
-        self.timer = nil
+        timer?.cancel()
+        timer = nil
         lock.unlock()
     }
 
     func formatURL(context: Context) -> URL? {
-        let url = self.unleashUrl
+        let url = unleashUrl
 
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.percentEncodedQuery = context
             .toURIMap()
             .compactMap { key, value in
                 if let encodedKey = key.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved),
-                   let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved) {
+                   let encodedValue = value.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)
+                {
                     return [encodedKey, encodedValue].joined(separator: "=")
                 }
                 return nil
@@ -117,7 +118,7 @@ public class Poller {
     }
 
     public func getFeature(name: String) -> Toggle? {
-        return self.storageProvider.value(key: name)
+        return storageProvider.value(key: name)
     }
 
     func getFeatures(
@@ -135,9 +136,9 @@ public class Poller {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let currentEtag: String
-        
+
         lock.lock()
-        currentEtag = self.etag
+        currentEtag = etag
         lock.unlock()
 
         request.setValue(apiKey, forHTTPHeaderField: "Authorization")
@@ -146,7 +147,7 @@ public class Poller {
         request.setValue(connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
         request.setValue("unleash-ios-sdk:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
 
-        let customHeaders = self.customHeaders.merging(self.customHeadersProvider.getCustomHeaders()) { (_, new) in
+        let customHeaders = self.customHeaders.merging(customHeadersProvider.getCustomHeaders()) { _, new in
             new
         }.filter { key, _ in !isSensitiveHeader(key) }
 
@@ -157,7 +158,7 @@ public class Poller {
         }
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
-        session.perform(request) { [self] (data, response, error) in
+        session.perform(request) { [self] data, response, error in
             guard let httpResponse = response as? HTTPURLResponse else {
                 Printer.printMessage("No response")
                 completionHandler?(.noResponse)
@@ -170,7 +171,7 @@ public class Poller {
                 return
             }
 
-            if httpResponse.statusCode > 399 && httpResponse.statusCode < 599 {
+            if httpResponse.statusCode > 399, httpResponse.statusCode < 599 {
                 completionHandler?(.network)
                 Printer.printMessage("Error fetching toggles")
                 return
@@ -216,7 +217,7 @@ public class Poller {
                 self.ready = true
             }
             lock.unlock()
-            
+
             if wasReady {
                 Printer.printMessage("Flags updated")
                 SwiftEventBus.post("update")
@@ -232,11 +233,11 @@ public class Poller {
     private func isSensitiveHeader(_ header: String) -> Bool {
         let lowercasedHeader = header.lowercased()
         return lowercasedHeader == "content-type" ||
-               lowercasedHeader == "if-none-match" ||
-               lowercasedHeader.hasPrefix("unleash-")
+            lowercasedHeader == "if-none-match" ||
+            lowercasedHeader.hasPrefix("unleash-")
     }
 }
 
-fileprivate extension CharacterSet {
+private extension CharacterSet {
     static let rfc3986Unreserved = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
 }
