@@ -156,7 +156,9 @@ public class Metrics {
         request.setValue("unleash-ios-sdk:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
         if let sdkFlavor {
             request.setValue(sdkFlavor, forHTTPHeaderField: "unleash-sdk-flavor")
-            request.setValue(sdkFlavorVersion, forHTTPHeaderField: LibraryInfo.version)
+        }
+        if let sdkFlavorVersion {
+            request.setValue(sdkFlavorVersion, forHTTPHeaderField: "unleash-sdk-flavor-version")
         }
         if !customHeaders.isEmpty {
             for (key, value) in customHeaders {

@@ -152,8 +152,10 @@ public class Poller {
         request.setValue(connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
         request.setValue("unleash-ios-sdk:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
         if let sdkFlavor {
-            request.setValue(sdkFlavor, forHTTPHeaderField: "unleash-ios-sdk-flavor")
-            request.setValue(sdkFlavorVersion, forHTTPHeaderField: LibraryInfo.version)
+            request.setValue(sdkFlavor, forHTTPHeaderField: "unleash-sdk-flavor")
+        }
+        if let sdkFlavorVersion {
+            request.setValue(sdkFlavorVersion, forHTTPHeaderField: "unleash-sdk-flavor-version")
         }
 
         let customHeaders = self.customHeaders.merging(self.customHeadersProvider.getCustomHeaders()) { (_, new) in

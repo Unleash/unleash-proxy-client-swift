@@ -103,8 +103,8 @@ final class MetricsTests: XCTestCase {
         var recordedFlavor: String?
         var recordedFlavorVersion: String?
         let poster: Metrics.PosterHandler = { request, completionHandler in
-            recordedFlavor = request.value(forHTTPHeaderField: "sdkFlavor")
-            recordedFlavorVersion = request.value(forHTTPHeaderField: "sdkFlavorVersion")
+            recordedFlavor = request.value(forHTTPHeaderField: "unleash-sdk-flavor")
+            recordedFlavorVersion = request.value(forHTTPHeaderField: "unleash-sdk-flavor-version")
             let response = HTTPURLResponse(url: URL(string: "https://unleashapi.com")!, statusCode: 200, httpVersion: nil, headerFields: nil)
             completionHandler(.success((Data(), response!)))
         }
@@ -116,7 +116,7 @@ final class MetricsTests: XCTestCase {
                 url: URL(string: "https://unleashinstance.com")!,
                 clientKey: "testKey",
                 connectionId: UUID(),
-                sdkFlavor: "unleash-openfeature-swift-provider:1.0.0",
+                sdkFlavor: "unleash-openfeature-swift-provider",
                 sdkFlavorVersion: "1.0.0"
                 )
         metrics.start()
@@ -124,7 +124,7 @@ final class MetricsTests: XCTestCase {
 
         wait(for: [metricsSent], timeout: 2)
 
-        XCTAssertEqual(recordedFlavor, "unleash-openfeature-swift-provider:1.0.0")
+        XCTAssertEqual(recordedFlavor, "unleash-openfeature-swift-provider")
         XCTAssertEqual(recordedFlavorVersion, "1.0.0")
     }
 
