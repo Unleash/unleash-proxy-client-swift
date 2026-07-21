@@ -5,6 +5,11 @@ import SwiftEventBus
 @testable import UnleashProxyClientSwift
 
 final class MetricsTests: XCTestCase {
+    override func tearDown() {
+        SwiftEventBus.unregister(self)
+        super.tearDown()
+    }
+
     func testCountMetrics() throws {
         let metricsSent = expectation(description: "Metrics sent")
         SwiftEventBus.onBackgroundThread(self, name: "sent") { _ in
