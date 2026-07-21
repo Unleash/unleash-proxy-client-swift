@@ -78,7 +78,7 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId, sdkFlavor: sdkFlavor)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId, sdkFlavor: sdkFlavor, sdkFlavorVersion: sdkFlavorVersion)
         }
 
         self._context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0..<1_000_000_000)))
