@@ -1,6 +1,5 @@
-@testable import UnleashProxyClientSwift
-
 import Foundation
+@testable import UnleashProxyClientSwift
 import XCTest
 
 final class BootstrapTests: XCTestCase {
@@ -8,26 +7,25 @@ final class BootstrapTests: XCTestCase {
     func testTogglesWhenBootstrapToggles() {
         let stubToggle = Toggle(name: "foo", enabled: true)
         let bootstrap = Bootstrap.toggles([stubToggle])
-        
+
         XCTAssertEqual(bootstrap.toggles, [stubToggle])
     }
-    
-    
+
     /// GIVEN a Bootstrap jsonFile, WHEN file does not exist, THEN toggles returns empty array
     func testTogglesWhenJsonFileDoesNotExist() {
         let bootstrap = Bootstrap.jsonFile(path: "")
         XCTAssertTrue(bootstrap.toggles.isEmpty)
     }
-    
+
     /// GIVEN a Bootstrap jsonFile, WHEN file exists, THEN toggles returns expected toggles
     func testTogglesWhenJsonFileExists() throws {
         let path = try XCTUnwrap(
             Bundle.module
                 .path(forResource: "FeatureResponseStub", ofType: "json")
         )
-        
+
         let bootstrap = Bootstrap.jsonFile(path: path)
-        
+
         let expectedToggles = [
             Toggle(name: "no-variant", enabled: true, variant: nil),
             Toggle(
@@ -44,9 +42,9 @@ final class BootstrapTests: XCTestCase {
                     featureEnabled: true,
                     payload: .init(type: "string", value: "baz")
                 )
-            )
+            ),
         ]
-        
+
         XCTAssertEqual(bootstrap.toggles, expectedToggles)
     }
 }

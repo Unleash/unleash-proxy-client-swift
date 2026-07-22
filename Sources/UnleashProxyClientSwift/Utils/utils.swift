@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  utils.swift
 //
 //
 //  Created by Fredrik Strand Oseberg on 13/05/2021.

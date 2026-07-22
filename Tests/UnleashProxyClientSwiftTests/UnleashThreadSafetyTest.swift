@@ -1,8 +1,7 @@
-import XCTest
 @testable import UnleashProxyClientSwift
+import XCTest
 
 class UnleashThreadSafetyTest: XCTestCase {
-
     private var shouldRunIntensiveTest: Bool {
         return ProcessInfo.processInfo.environment["UNLEASH_THREAD_SAFETY_TEST"] == "1"
     }
@@ -31,7 +30,7 @@ class UnleashThreadSafetyTest: XCTestCase {
         client.start()
 
         // Run the test with high iteration count to increase chances of detecting race conditions
-        for _ in 0..<10000 {
+        for _ in 0 ..< 10000 {
             // Update context with userId and isAuthenticated properties
             client.updateContext(context: ["userId": "1"], properties: ["isAuthenticated": "true"]) { _ in }
 

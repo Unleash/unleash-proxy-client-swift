@@ -7,7 +7,7 @@ struct MetricsPayload {
         [
             "appName": appName,
             "instanceId": instanceId,
-            "bucket": bucket.toJson()
+            "bucket": bucket.toJson(),
         ]
     }
 }

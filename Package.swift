@@ -13,7 +13,8 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "UnleashProxyClientSwift",
-            targets: ["UnleashProxyClientSwift"]),
+            targets: ["UnleashProxyClientSwift"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/cesarferreira/SwiftEventBus.git", from: "5.1.0"),
@@ -31,9 +32,8 @@ let package = Package(
             name: "UnleashProxyClientSwiftTests",
             dependencies: ["UnleashProxyClientSwift"],
             resources: [
-                .copy("FeatureResponseStub.json")
+                .copy("FeatureResponseStub.json"),
             ]
         ),
-        
     ]
 )
