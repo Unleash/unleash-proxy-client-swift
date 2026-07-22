@@ -39,7 +39,7 @@ public class Metrics {
         self.poster = poster
         self.url = url
         self.clientKey = clientKey
-        self.bucket = Bucket(clock: clock)
+        bucket = Bucket(clock: clock)
         self.customHeaders = customHeaders
         self.connectionId = connectionId
         self.sdkFlavor = sdkFlavor
@@ -48,15 +48,17 @@ public class Metrics {
 
     func start() {
         lock.lock()
-        let isDisabled = self.disableMetrics
+        let isDisabled = disableMetrics
         lock.unlock()
 
-        if isDisabled { return }
+        if isDisabled {
+            return
+        }
 
         lock.lock()
         self.timer?.cancel()
         self.timer = nil
-        let interval = self.metricsInterval
+        let interval = metricsInterval
         lock.unlock()
 
         let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .background))
@@ -74,14 +76,14 @@ public class Metrics {
 
     func stop() {
         lock.lock()
-        self.timer?.cancel()
-        self.timer = nil
+        timer?.cancel()
+        timer = nil
         lock.unlock()
     }
 
     func count(name: String, enabled: Bool) {
         lock.lock()
-        let isDisabled = self.disableMetrics
+        let isDisabled = disableMetrics
         if isDisabled {
             lock.unlock()
             return
@@ -99,7 +101,7 @@ public class Metrics {
 
     func countVariant(name: String, variant: String) {
         lock.lock()
-        let isDisabled = self.disableMetrics
+        let isDisabled = disableMetrics
         if isDisabled {
             lock.unlock()
             return
@@ -114,11 +116,11 @@ public class Metrics {
     func sendMetrics() {
         let localBucket: Bucket
         let clockFunction: () -> Date
-        
+
         lock.lock()
         bucket.closeBucket()
         localBucket = bucket
-        clockFunction = self.clock
+        clockFunction = clock
         bucket = Bucket(clock: clockFunction)
         lock.unlock()
 
@@ -130,9 +132,9 @@ public class Metrics {
             let request = createRequest(payload: jsonPayload)
             poster(request) { result in
                 switch result {
-                case .success(_):
+                case .success:
                     SwiftEventBus.post("sent")
-                case .failure(let error):
+                case let .failure(error):
                     Printer.printMessage("Error sending metrics")
                     SwiftEventBus.post("error", sender: error)
                 }

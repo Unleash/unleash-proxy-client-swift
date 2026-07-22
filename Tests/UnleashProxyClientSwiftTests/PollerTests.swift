@@ -1,8 +1,7 @@
-import XCTest
 @testable import UnleashProxyClientSwift
+import XCTest
 
 final class PollerTests: XCTestCase {
-
     private let unleashUrl = URL(string: "https://app.unleash-hosted.com/hosted/api/proxy")!
     private let apiKey = "SECRET"
     private let appName = "APPNAME"
@@ -21,21 +20,21 @@ final class PollerTests: XCTestCase {
                     featureEnabled: true,
                     payload: .init(type: "string", value: "FooBarBaz")
                 )
-            )
+            ),
         ]
-        
+
         let poller = createPoller(
             with: MockPollerSession(),
             bootstrap: .toggles(stubToggles)
         )
-        
+
         let foo = poller.getFeature(name: "Foo")
         let bar = poller.getFeature(name: "Bar")
-        
-        XCTAssertEqual(foo, stubToggles.first!)
-        XCTAssertEqual(bar, stubToggles.last!)
+
+        XCTAssertEqual(foo, stubToggles.first)
+        XCTAssertEqual(bar, stubToggles.last)
     }
-    
+
     func testWhenInitWithBootstrapFileThenAddToStore() {
         let poller = createPoller(
             with: MockPollerSession(),
@@ -50,7 +49,7 @@ final class PollerTests: XCTestCase {
             poller.getFeature(name: "no-variant"),
             Toggle(name: "no-variant", enabled: true)
         )
-        
+
         XCTAssertEqual(
             poller.getFeature(
                 name: "disabled-with-variant-disabled-no-payload"
@@ -65,7 +64,7 @@ final class PollerTests: XCTestCase {
                 )
             )
         )
-        
+
         XCTAssertEqual(
             poller.getFeature(
                 name: "enabled-with-variant-enabled-and-payload"
@@ -85,7 +84,7 @@ final class PollerTests: XCTestCase {
             )
         )
     }
-    
+
     func testTitleCaseEtagResponseHeader() {
         let response = mockResponse(headerFields: ["Etag": "W/\"77f-WboeNIYTrCbEJ+TK78VuhInQn2M\""])
         let data = stubData()
@@ -146,7 +145,7 @@ final class PollerTests: XCTestCase {
     }
 
     func testStartCompletesWithNetworkError() {
-        for statusCode in 400..<599 {
+        for statusCode in 400 ..< 599 {
             let response = mockResponse(statusCode: statusCode)
             let data = stubData()
             let session = MockPollerSession(data: data, response: response)
@@ -160,10 +159,10 @@ final class PollerTests: XCTestCase {
         }
     }
 
-    func testStartCompletesWithDecodingError() {
+    func testStartCompletesWithDecodingError() throws {
         let response = mockResponse()
         let stub: [String: Any] = ["toggles": [["foo": "bar", "baz": true]]]
-        let data = try! JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)
+        let data = try JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)
         let session = MockPollerSession(data: data, response: response)
         let poller = createPoller(with: session)
         let expectation = XCTestExpectation(description: "Expect .decoding PollerError.")
@@ -186,7 +185,7 @@ final class PollerTests: XCTestCase {
         }
         wait(for: [expectation], timeout: timeout)
     }
-    
+
     func testCustomHeaders() {
         let customHeaders: [String: String] = ["X-Custom-Header": "CustomValue", "X-Another-Header": "AnotherValue", "unleash-appname": "Should be ignored", "Content-Type": "Should be ignored", "If-None-Match": "Should be ignored"]
         let response = mockResponse()
@@ -248,18 +247,18 @@ final class PollerTests: XCTestCase {
                     featureEnabled: true,
                     payload: .init(type: "string", value: "FooBarBaz")
                 )
-            )
+            ),
         ]
-        
+
         let poller = createPoller(with: MockPollerSession())
-        
+
         XCTAssertNil(poller.getFeature(name: "Foo"))
         XCTAssertNil(poller.getFeature(name: "Bar"))
-        
+
         poller.start(bootstrapping: stubToggles, context: Context())
-        
-        XCTAssertEqual(poller.getFeature(name: "Foo"), stubToggles.first!)
-        XCTAssertEqual(poller.getFeature(name: "Bar"), stubToggles.last!)
+
+        XCTAssertEqual(poller.getFeature(name: "Foo"), stubToggles.first)
+        XCTAssertEqual(poller.getFeature(name: "Bar"), stubToggles.last)
     }
 
     func testTimerNotInitializedWhenRefreshIntervalIsZero() {
@@ -271,7 +270,7 @@ final class PollerTests: XCTestCase {
             appName: appName,
             connectionId: connectionId
         )
-        
+
         XCTAssertNil(poller.timer, "Timer should not be initialized when refreshInterval is zero")
     }
 
@@ -291,7 +290,7 @@ final class PollerTests: XCTestCase {
         )
     }
 
-    private func mockResponse(statusCode: Int = 200, headerFields: [String : String]? = nil) -> URLResponse {
+    private func mockResponse(statusCode: Int = 200, headerFields: [String: String]? = nil) -> URLResponse {
         return HTTPURLResponse(url: unleashUrl, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
     }
 
@@ -305,22 +304,22 @@ final class PollerTests: XCTestCase {
                 [
                     "name": "bar",
                     "enabled": false,
-                    "variant": ["name": "disabled", "enabled": false]
-                ]
-            ]
+                    "variant": ["name": "disabled", "enabled": false],
+                ],
+            ],
         ]
         return try! JSONSerialization.data(withJSONObject: stub, options: .prettyPrinted)
     }
 }
 
 private class MockCustomHeadersProvider: CustomHeadersProvider {
-    private let customHeaders: [String:String]
+    private let customHeaders: [String: String]
 
-    init(customHeaders: [String:String]) {
+    init(customHeaders: [String: String]) {
         self.customHeaders = customHeaders
     }
 
-    public func getCustomHeaders() -> [String: String] {
+    func getCustomHeaders() -> [String: String] {
         return customHeaders
     }
 }

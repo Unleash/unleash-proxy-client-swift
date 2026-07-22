@@ -1,4 +1,5 @@
 // MARK: UnleashEvent
+
 public enum UnleashEvent: String, CaseIterable {
     /// Emitted when UnleashClient is ready after finished first flag fetch
     case ready

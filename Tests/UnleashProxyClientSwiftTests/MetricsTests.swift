@@ -1,8 +1,8 @@
 // MetricsTests.swift
 
-import XCTest
 import SwiftEventBus
 @testable import UnleashProxyClientSwift
+import XCTest
 
 final class MetricsTests: XCTestCase {
     override func tearDown() {
@@ -26,13 +26,13 @@ final class MetricsTests: XCTestCase {
             completionHandler(.success((Data(), response!)))
         }
 
-        let metrics = Metrics(appName: "TestApp",
-                metricsInterval: 1,
-                clock: fixedClock,
-                poster: poster,
-                url: URL(string: "https://unleashinstance.com")!,
-                clientKey: "testKey",
-                connectionId: UUID())
+        let metrics = try Metrics(appName: "TestApp",
+                                  metricsInterval: 1,
+                                  clock: fixedClock,
+                                  poster: poster,
+                                  url: XCTUnwrap(URL(string: "https://unleashinstance.com")),
+                                  clientKey: "testKey",
+                                  connectionId: UUID())
         metrics.start()
 
         metrics.count(name: "testToggle", enabled: true)
@@ -45,32 +45,32 @@ final class MetricsTests: XCTestCase {
         wait(for: [metricsSent], timeout: 2)
 
         let expectedMetrics = """
-                              {
-                                "appName" : "TestApp",
-                                "bucket" : {
-                                  "start" : "2022-12-24T23:00:00Z",
-                                  "stop" : "2022-12-24T23:00:00Z",
-                                  "toggles" : {
-                                    "testToggle" : {
-                                      "yes" : 2,
-                                      "no" : 1,
-                                      "variants" : {
-                                        "variantA" : 2,
-                                        "variantB": 1
-                                      }
-                                    }
-                                  }
-                                },
-                                "instanceId" : "swift"
-                              }
-                              """;
+        {
+          "appName" : "TestApp",
+          "bucket" : {
+            "start" : "2022-12-24T23:00:00Z",
+            "stop" : "2022-12-24T23:00:00Z",
+            "toggles" : {
+              "testToggle" : {
+                "yes" : 2,
+                "no" : 1,
+                "variants" : {
+                  "variantA" : 2,
+                  "variantB": 1
+                }
+              }
+            }
+          },
+          "instanceId" : "swift"
+        }
+        """
 
-        let decodedRecordedRequestBody = try JSONSerialization.jsonObject(with: recordedRequestBody!, options: [])
+        let decodedRecordedRequestBody = try JSONSerialization.jsonObject(with: XCTUnwrap(recordedRequestBody), options: [])
         let decodedExpectedMetrics = try JSONSerialization.jsonObject(with: Data(expectedMetrics.utf8), options: [])
 
         XCTAssertEqual(decodedRecordedRequestBody as? [String: AnyHashable],
-                decodedExpectedMetrics as? [String: AnyHashable],
-                "The recorded request body should match the expected metrics")
+                       decodedExpectedMetrics as? [String: AnyHashable],
+                       "The recorded request body should match the expected metrics")
     }
 
     func testFailOnCountMetricsSent() throws {
@@ -81,17 +81,17 @@ final class MetricsTests: XCTestCase {
 
         let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
 
-        let poster: Metrics.PosterHandler = { request, completionHandler in
-            completionHandler(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Metrics posting error"])))
+        let poster: Metrics.PosterHandler = { _, completionHandler in
+            completionHandler(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Metrics posting error"])))
         }
 
-        let metrics = Metrics(appName: "TestApp",
-                metricsInterval: 1,
-                clock: fixedClock,
-                poster: poster,
-                url: URL(string: "https://unleashinstance.com")!,
-                clientKey: "testKey",
-                connectionId: UUID())
+        let metrics = try Metrics(appName: "TestApp",
+                                  metricsInterval: 1,
+                                  clock: fixedClock,
+                                  poster: poster,
+                                  url: XCTUnwrap(URL(string: "https://unleashinstance.com")),
+                                  clientKey: "testKey",
+                                  connectionId: UUID())
         metrics.start()
 
         metrics.count(name: "irrelevant", enabled: true)
@@ -164,18 +164,18 @@ final class MetricsTests: XCTestCase {
     func testDisabledMetrics() throws {
         let fixedClock = { DateComponents(calendar: .current, timeZone: TimeZone(identifier: "UTC"), year: 2022, month: 12, day: 24, hour: 23, minute: 0, second: 0).date! }
 
-        let poster: Metrics.PosterHandler = { request, completionHandler in
-            completionHandler(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "should never get here"])))
+        let poster: Metrics.PosterHandler = { _, completionHandler in
+            completionHandler(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "should never get here"])))
         }
 
-        let metrics = Metrics(appName: "TestApp",
-                metricsInterval: 1,
-                clock: fixedClock,
-                disableMetrics: true,
-                poster: poster,
-                url: URL(string: "https://unleashinstance.com")!,
-                clientKey: "testKey",
-                connectionId: UUID())
+        let metrics = try Metrics(appName: "TestApp",
+                                  metricsInterval: 1,
+                                  clock: fixedClock,
+                                  disableMetrics: true,
+                                  poster: poster,
+                                  url: XCTUnwrap(URL(string: "https://unleashinstance.com")),
+                                  clientKey: "testKey",
+                                  connectionId: UUID())
         metrics.start()
 
         metrics.count(name: "irrelevant", enabled: true)
@@ -183,6 +183,4 @@ final class MetricsTests: XCTestCase {
 
         XCTAssertEqual(metrics.bucket.toggles, [:])
     }
-
-
 }

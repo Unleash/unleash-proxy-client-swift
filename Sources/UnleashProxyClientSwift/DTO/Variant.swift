@@ -1,10 +1,11 @@
 // MARK: - Variant
+
 public struct Variant: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case name, enabled, payload
         case featureEnabled = "feature_enabled"
     }
-    
+
     /// Name of the variant
     public let name: String
     /// Enabled state for the variant
@@ -17,7 +18,7 @@ public struct Variant: Codable, Equatable {
     public let featureEnabled: Bool?
     /// Optional payload delivered with the variant
     public let payload: Payload?
-    
+
     public init(
         name: String,
         enabled: Bool,
