@@ -38,7 +38,9 @@ public class UnleashClientBase {
         metrics: Metrics? = nil,
         customHeaders: [String: String] = [:],
         customHeadersProvider: CustomHeadersProvider = DefaultCustomHeadersProvider(),
-        bootstrap: Bootstrap = .toggles([])
+        bootstrap: Bootstrap = .toggles([]),
+        sdkFlavor: String? = nil,
+        sdkFlavorVersion: String? = nil
     ) {
         guard let url = URL(string: unleashUrl), url.scheme != nil else {
             fatalError("Invalid Unleash URL: \(unleashUrl)")
@@ -58,7 +60,9 @@ public class UnleashClientBase {
                 customHeadersProvider: customHeadersProvider,
                 bootstrap: bootstrap,
                 appName: appName,
-                connectionId: connectionId
+                connectionId: connectionId,
+                sdkFlavor: sdkFlavor,
+                sdkFlavorVersion: sdkFlavorVersion
             )
         }
         if let metrics = metrics {
@@ -74,7 +78,7 @@ public class UnleashClientBase {
                 }
                 task.resume()
             }
-            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId)
+            self.metrics = Metrics(appName: appName, metricsInterval: Double(metricsInterval), clock: { return Date() }, disableMetrics: disableMetrics, poster: urlSessionPoster, url: url, clientKey: clientKey, customHeaders: customHeaders, connectionId: connectionId, sdkFlavor: sdkFlavor, sdkFlavorVersion: sdkFlavorVersion)
         }
 
         self._context = Context(appName: appName, environment: environment, sessionId: String(Int.random(in: 0..<1_000_000_000)))
