@@ -14,19 +14,24 @@ public class Metrics {
     let url: URL
     let customHeaders: [String: String]
     let connectionId: UUID
+    let sdkFlavor: String?
+    let sdkFlavorVersion: String?
 
     private let lock = NSLock()
 
-    init(appName: String,
-         metricsInterval: TimeInterval,
-         clock: @escaping () -> Date,
-         disableMetrics: Bool = false,
-         poster: @escaping PosterHandler,
-         url: URL,
-         clientKey: String,
-         customHeaders: [String: String] = [:],
-         connectionId: UUID)
-    {
+    init(
+        appName: String,
+        metricsInterval: TimeInterval,
+        clock: @escaping () -> Date,
+        disableMetrics: Bool = false,
+        poster: @escaping PosterHandler,
+        url: URL,
+        clientKey: String,
+        customHeaders: [String: String] = [:],
+        connectionId: UUID,
+        sdkFlavor: String? = nil,
+        sdkFlavorVersion: String? = nil
+        ) {
         self.appName = appName
         self.metricsInterval = metricsInterval
         self.clock = clock
@@ -37,6 +42,8 @@ public class Metrics {
         bucket = Bucket(clock: clock)
         self.customHeaders = customHeaders
         self.connectionId = connectionId
+        self.sdkFlavor = sdkFlavor
+        self.sdkFlavorVersion = sdkFlavorVersion
     }
 
     func start() {
@@ -149,6 +156,12 @@ public class Metrics {
         request.addValue(appName, forHTTPHeaderField: "unleash-appname")
         request.addValue(connectionId.uuidString, forHTTPHeaderField: "unleash-connection-id")
         request.setValue("unleash-ios-sdk:\(LibraryInfo.version)", forHTTPHeaderField: "unleash-sdk")
+        if let sdkFlavor {
+            request.setValue(sdkFlavor, forHTTPHeaderField: "unleash-sdk-flavor")
+        }
+        if let sdkFlavorVersion {
+            request.setValue(sdkFlavorVersion, forHTTPHeaderField: "unleash-sdk-flavor-version")
+        }
         if !customHeaders.isEmpty {
             for (key, value) in customHeaders {
                 request.setValue(value, forHTTPHeaderField: key)
