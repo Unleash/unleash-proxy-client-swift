@@ -203,7 +203,7 @@ public class Poller {
 
             var result: FeatureResponse?
 
-            if let newEtag = httpResponse.allHeaderFields["Etag"] as? String, !newEtag.isEmpty {
+            if let newEtag = httpResponse.value(forHTTPHeaderField: "Etag"), !newEtag.isEmpty {
                 lock.lock()
                 self.etag = newEtag
                 lock.unlock()

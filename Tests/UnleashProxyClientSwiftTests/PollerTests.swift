@@ -290,8 +290,8 @@ final class PollerTests: XCTestCase {
         )
     }
 
-    private func mockResponse(statusCode: Int = 200, headerFields: [String: String]? = nil) -> URLResponse {
-        return HTTPURLResponse(url: unleashUrl, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
+    private func mockResponse(statusCode: Int = 200, headerFields: [String: String] = [:]) -> URLResponse {
+        return FakeHTTPURLResponse(url: unleashUrl, statusCode: statusCode, headerFields: headerFields)
     }
 
     private func stubData() -> Data {
