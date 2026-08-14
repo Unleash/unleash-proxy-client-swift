@@ -203,7 +203,7 @@ public class Poller {
 
             var result: FeatureResponse?
 
-            if let newEtag = httpResponse.value(forHTTPHeaderField: "Etag"), !newEtag.isEmpty {
+            if let newEtag = value(forHTTPHeaderField: "Etag", in: httpResponse), !newEtag.isEmpty {
                 lock.lock()
                 self.etag = newEtag
                 lock.unlock()
@@ -247,6 +247,14 @@ public class Poller {
         return lowercasedHeader == "content-type" ||
             lowercasedHeader == "if-none-match" ||
             lowercasedHeader.hasPrefix("unleash-")
+    }
+
+    private func value(forHTTPHeaderField field: String, in response: HTTPURLResponse) -> String? {
+        if #available(iOS 13.0, *) {
+             return response.value(forHTTPHeaderField: field)
+        } else {
+            return (response.allHeaderFields as NSDictionary)[field] as? String
+        }
     }
 }
 
