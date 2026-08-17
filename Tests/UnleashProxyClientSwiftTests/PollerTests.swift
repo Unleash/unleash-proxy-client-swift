@@ -107,6 +107,17 @@ final class PollerTests: XCTestCase {
         XCTAssertEqual(poller.etag, "W/\"710-wJiNH+MQpj0ruMo7n/9j36tB+Fg\"")
     }
 
+    func testRawEtagResponseHeaderLookupIsCaseInsensitive() {
+        let response = mockResponse(headerFields: ["ETAG": "W/\"710-wJiNH+MQpj0ruMo7n/9j36tB+Fg\""])
+        let data = stubData()
+        let session = MockPollerSession(data: data, response: response)
+        let poller = createPoller(with: session)
+
+        XCTAssertTrue(poller.etag.isEmpty)
+        poller.getFeatures(context: Context())
+        XCTAssertEqual(poller.etag, "W/\"710-wJiNH+MQpj0ruMo7n/9j36tB+Fg\"")
+    }
+
     func testEmptyEtagResponseHeader() {
         let response = mockResponse(headerFields: ["Etag": ""])
         let data = stubData()
