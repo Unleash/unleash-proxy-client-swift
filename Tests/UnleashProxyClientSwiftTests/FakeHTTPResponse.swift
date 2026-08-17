@@ -1,6 +1,6 @@
 import Foundation
 
-/// Simulates a real network `HTTPURLResponse` by keeping header keys case-insensitive
+/// Simulates a real network `HTTPURLResponse` with raw header casing
 /// without Apple's default constructor key-canonicalization.
 final class FakeHTTPURLResponse: HTTPURLResponse, @unchecked Sendable {
     private let rawHeaders: [String: String]
@@ -16,11 +16,5 @@ final class FakeHTTPURLResponse: HTTPURLResponse, @unchecked Sendable {
 
     override var allHeaderFields: [AnyHashable: Any] {
         return rawHeaders
-    }
-
-    override func value(forHTTPHeaderField field: String) -> String? {
-        return rawHeaders.first { key, _ in
-            key.caseInsensitiveCompare(field) == .orderedSame
-        }?.value
     }
 }
